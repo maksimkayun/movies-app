@@ -35,31 +35,30 @@ namespace MoviesApp.Controllers
         }
 
         // GET: Movies/Details/5
-        // [HttpGet]
-        // public IActionResult Details(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
-        //     {
-        //         Id = m.Id,
-        //         Genre = m.Genre,
-        //         Price = m.Price,
-        //         Title = m.Title,
-        //         ReleaseDate = m.ReleaseDate
-        //     }).FirstOrDefault();
-        //
-        //     
-        //     if (viewModel == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     return View(viewModel);
-        // }
+        [HttpGet]
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+        
+            var viewModel = _context.Artists.Where(m => m.Id == id).Select(m => new ArtistViewModel
+            {
+                Id = m.Id,
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                Birthday = m.Birthday
+            }).FirstOrDefault();
+        
+            
+            if (viewModel == null)
+            {
+                return NotFound();
+            }
+        
+            return View(viewModel);
+        }
         
         // GET: Movies/Create
         [HttpGet]
@@ -92,67 +91,65 @@ namespace MoviesApp.Controllers
         
         // [HttpGet]
         // // GET: Movies/Edit/5
-        // public IActionResult Edit(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     var editModel = _context.Movies.Where(m => m.Id == id).Select(m => new EditMovieViewModel
-        //     {
-        //         Genre = m.Genre,
-        //         Price = m.Price,
-        //         Title = m.Title,
-        //         ReleaseDate = m.ReleaseDate
-        //     }).FirstOrDefault();
-        //     
-        //     if (editModel == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     
-        //     return View(editModel);
-        // }
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+        
+            var editModel = _context.Artists.Where(m => m.Id == id).Select(m => new EditArtistViewModel
+            {
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                Birthday = m.Birthday
+            }).FirstOrDefault();
+            
+            if (editModel == null)
+            {
+                return NotFound();
+            }
+            
+            return View(editModel);
+        }
 
         // POST: Movies/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] EditMovieViewModel editModel)
-        // {
-        //     if (ModelState.IsValid)
-        //     {
-        //         try
-        //         {
-        //             var movie = new Movie
-        //             {
-        //                 Id = id,
-        //                 Genre = editModel.Genre,
-        //                 Price = editModel.Price,
-        //                 Title = editModel.Title,
-        //                 ReleaseDate = editModel.ReleaseDate
-        //             };
-        //             
-        //             _context.Update(movie);
-        //             _context.SaveChanges();
-        //         }
-        //         catch (DbUpdateException)
-        //         {
-        //             if (!MovieExists(id))
-        //             {
-        //                 return NotFound();
-        //             }
-        //             else
-        //             {
-        //                 throw;
-        //             }
-        //         }
-        //         return RedirectToAction(nameof(Index));
-        //     }
-        //     return View(editModel);
-        // }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var artist = new Artist
+                    {
+                        Id = id,
+                        FirstName = editModel.FirstName,
+                        LastName = editModel.LastName,
+                        Birthday = editModel.Birthday
+                    };
+                    
+                    _context.Update(artist);
+                    _context.SaveChanges();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!ArtistExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(editModel);
+        }
         
         [HttpGet]
         // GET: Movies/Delete/5
