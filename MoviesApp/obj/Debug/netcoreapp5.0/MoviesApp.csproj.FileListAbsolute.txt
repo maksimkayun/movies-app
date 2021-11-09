@@ -74,3 +74,4 @@ C:\Users\Dushevno\Desktop\GIT\MoviesApp - обновлённый\MoviesApp\obj\D
 C:\Users\Dushevno\Desktop\GIT\MoviesApp - обновлённый\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.genruntimeconfig.cache
 C:\Users\Dushevno\Desktop\GIT\MoviesApp - обновлённый\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Artists\Create.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\MoviesApp - обновлённый\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Artists\Index.cshtml.g.cs
+C:\Users\Dushevno\Desktop\GIT\MoviesApp - обновлённый\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Artists\Delete.cshtml.g.cs

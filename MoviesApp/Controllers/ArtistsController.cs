@@ -27,6 +27,7 @@ namespace MoviesApp.Controllers
         {
             return View(_context.Artists.Select(m => new ArtistViewModel
             {
+                Id = m.Id, 
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday
@@ -153,46 +154,45 @@ namespace MoviesApp.Controllers
         //     return View(editModel);
         // }
         
-        // [HttpGet]
-        // // GET: Movies/Delete/5
-        // public IActionResult Delete(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     var deleteModel = _context.Movies.Where(m => m.Id == id).Select(m => new DeleteMovieViewModel
-        //     {
-        //         Genre = m.Genre,
-        //         Price = m.Price,
-        //         Title = m.Title,
-        //         ReleaseDate = m.ReleaseDate
-        //     }).FirstOrDefault();
-        //     
-        //     if (deleteModel == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     return View(deleteModel);
-        // }
+        [HttpGet]
+        // GET: Movies/Delete/5
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+        
+            var deleteModel = _context.Artists.Where(m => m.Id == id).Select(m => new DeleteArtistViewModel
+            {
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                Birthday = m.Birthday
+            }).FirstOrDefault();
+            
+            if (deleteModel == null)
+            {
+                return NotFound();
+            }
+        
+            return View(deleteModel);
+        }
         
         // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var movie = _context.Movies.Find(id);
-            _context.Movies.Remove(movie);
+            var artist = _context.Artists.Find(id);
+            _context.Artists.Remove(artist);
             _context.SaveChanges();
-            _logger.LogError($"Movie with id {movie.Id} has been deleted!");
+            _logger.LogError($"Artist with id {artist.Id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MovieExists(int id)
+        private bool ArtistExists(int id)
         {
-            return _context.Movies.Any(e => e.Id == id);
+            return _context.Artists.Any(e => e.Id == id);
         }
     }
 }
