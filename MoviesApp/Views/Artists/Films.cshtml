@@ -1,15 +1,12 @@
 @using System.Linq
-@model IEnumerable<MoviesApp.ViewModels.MovieViewModel>
+@model IEnumerable<MoviesApp.ViewModels.FilmsViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Films";
 }
 
-<h1>Movies</h1>
+<h1>Films</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
     <tr>
@@ -17,7 +14,7 @@
             <label asp-for="@Model.First().Title"></label>
         </th>
         <th>
-             <label asp-for="@Model.First().ReleaseDate"></label>
+            <label asp-for="@Model.First().ReleaseDate"></label>
         </th>
         <th>
             <label asp-for="@Model.First().Genre"></label>
@@ -43,13 +40,10 @@
             <td>
                 @item.Price
             </td>
-            <td>
-                <a asp-action="Artists" asp-route-id="@item.Id">Artists</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
         </tr>
     }
     </tbody>
 </table>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

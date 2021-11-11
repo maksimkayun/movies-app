@@ -10,8 +10,16 @@ namespace MoviesApp.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MoviesArtist>(entity =>
+            {
+                entity.HasKey(sc => new {sc.MovieId, sc.ArtistId});
+            });
+        }
+
         public DbSet<Movie> Movies { get; set; }
-        
         public DbSet<Artist> Artists { get; set; }
+        public DbSet<MoviesArtist> MoviesArtists { get; set; }
     }
 }

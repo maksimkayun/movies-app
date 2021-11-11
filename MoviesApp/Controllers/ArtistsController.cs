@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,26 @@ namespace MoviesApp.Controllers
                 LastName = m.LastName,
                 Birthday = m.Birthday
             }).ToList());
+        }
+        
+        [HttpGet]
+        public IActionResult Films(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<FilmsViewModel> viewModel = (_context.MoviesArtists.Where(ma => ma.ArtistId == id)
+                .Select(m => new FilmsViewModel
+                {
+                    Title = m.Movie.Title,
+                    ReleaseDate = m.Movie.ReleaseDate,
+                    Genre = m.Movie.Genre,
+                    Price = m.Movie.Price
+                })).ToList();
+
+            return View(viewModel);
         }
 
         // GET: Movies/Details/5
@@ -181,6 +202,12 @@ namespace MoviesApp.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             var artist = _context.Artists.Find(id);
+            var сommunications = _context.MoviesArtists.Where(ma => ma.ArtistId == id)
+                .Select(ma => ma).ToList();
+            foreach (var elem in сommunications)
+            {
+                _context.MoviesArtists.Remove(elem);
+            }
             _context.Artists.Remove(artist);
             _context.SaveChanges();
             _logger.LogError($"Artist with id {artist.Id} has been deleted!");

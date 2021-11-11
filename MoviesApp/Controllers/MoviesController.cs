@@ -34,6 +34,31 @@ namespace MoviesApp.Controllers
                 ReleaseDate = m.ReleaseDate
             }).ToList());
         }
+        
+        [HttpGet]
+        public IActionResult Artists(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = _context.MoviesArtists.Where(ma => ma.MovieId == id)
+                .Select(a => new ArtistsViewModel
+                {
+                    FirstName = a.Artist.FirstName,
+                    LastName = a.Artist.LastName,
+                    Birthday = a.Artist.Birthday
+                }).ToList();
+
+            
+            if (viewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(viewModel);
+        }
 
         // GET: Movies/Details/5
         [HttpGet]
@@ -187,6 +212,12 @@ namespace MoviesApp.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             var movie = _context.Movies.Find(id);
+            var сommunications = _context.MoviesArtists.Where(ma => ma.MovieId == id)
+                .Select(ma => ma).ToList();
+            foreach (var elem in сommunications)
+            {
+                _context.MoviesArtists.Remove(elem);
+            }
             _context.Movies.Remove(movie);
             _context.SaveChanges();
             _logger.LogError($"Movie with id {movie.Id} has been deleted!");

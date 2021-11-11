@@ -5899,11 +5899,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp - обновлённый\\MoviesApp\\MoviesApp.csproj",
+      "projectUniqueName": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp\\MoviesApp\\MoviesApp.csproj",
       "projectName": "MoviesApp",
-      "projectPath": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp - обновлённый\\MoviesApp\\MoviesApp.csproj",
+      "projectPath": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp\\MoviesApp\\MoviesApp.csproj",
       "packagesPath": "C:\\Users\\Dushevno\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp - обновлённый\\MoviesApp\\obj\\",
+      "outputPath": "C:\\Users\\Dushevno\\Desktop\\GIT\\MoviesApp\\MoviesApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Dushevno\\AppData\\Roaming\\NuGet\\NuGet.Config",
