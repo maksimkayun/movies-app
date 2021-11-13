@@ -69,7 +69,8 @@ namespace MoviesApp.Controllers
                 Id = m.Id,
                 FirstName = m.FirstName,
                 LastName = m.LastName,
-                Birthday = m.Birthday
+                Birthday = m.Birthday,
+                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m.Movie)
             }).FirstOrDefault();
         
             
