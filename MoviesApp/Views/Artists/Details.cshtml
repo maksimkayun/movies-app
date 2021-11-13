@@ -31,46 +31,48 @@
         </dd>
     </dl>
 </div>
+
+<h5>Films in which the actor starred</h5>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            <label asp-for="@Model.Movies.FirstOrDefault().Title"></label>
+        </th>
+        <th>
+            <label asp-for="@Model.Movies.FirstOrDefault().ReleaseDate"></label>
+        </th>
+        <th>
+            <label asp-for="@Model.Movies.FirstOrDefault().Genre"></label>
+        </th>
+        <th>
+            <label asp-for="@Model.Movies.FirstOrDefault().Price"></label>
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Movies)
+    {
+        <tr>
+            <td>
+                @item.Title
+            </td>
+            <td>
+                @item.ReleaseDate.ToString("dd.MM.yyyy")
+            </td>
+            <td>
+                @item.Genre
+            </td>
+            <td>
+                @item.Price
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
-<h4>Movies</h4>
-<table class="table">
-<thead>
-<tr>
-    <th>
-        <label asp-for="@Model.Movies.FirstOrDefault().Title"></label>
-    </th>
-    <th>
-        <label asp-for="@Model.Movies.FirstOrDefault().ReleaseDate"></label>
-    </th>
-    <th>
-        <label asp-for="@Model.Movies.FirstOrDefault().Genre"></label>
-    </th>
-    <th>
-        <label asp-for="@Model.Movies.FirstOrDefault().Price"></label>
-    </th>
-    <th></th>
-</tr>
-</thead>
-<tbody>
-@foreach (var item in Model.Movies)
-{
-    <tr>
-        <td>
-            @item.Title
-        </td>
-        <td>
-            @item.ReleaseDate.ToString("dd.MM.yyyy")
-        </td>
-        <td>
-            @item.Genre
-        </td>
-        <td>
-            @item.Price
-        </td>
-    </tr>
-}
-</tbody>
-</table>
