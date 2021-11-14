@@ -21,8 +21,7 @@ namespace MoviesApp.Controllers
             _context = context;
             _logger = logger;
         }
-
-        // GET: Movies
+        
         [HttpGet]
         public IActionResult Index()
         {
@@ -34,8 +33,7 @@ namespace MoviesApp.Controllers
                 Birthday = m.Birthday
             }).ToList());
         }
-
-        // GET: Movies/Details/5
+        
         [HttpGet]
         public IActionResult Details(int? id)
         {
@@ -63,7 +61,6 @@ namespace MoviesApp.Controllers
             return View(viewModel);
         }
         
-        // GET: Movies/Create
         [HttpGet]
         public IActionResult Create()
         {
@@ -72,10 +69,6 @@ namespace MoviesApp.Controllers
             return View();
         }
 
-
-        // POST: Movies/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("FirstName,LastName,Birthday")] 
@@ -104,8 +97,6 @@ namespace MoviesApp.Controllers
             return View(artist);
         }
         
-        // [HttpGet]
-        // // GET: Movies/Edit/5
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -125,6 +116,41 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
             
+            return View(editModel);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var artist = new Artist
+                    {
+                        Id = id,
+                        FirstName = editModel.FirstName,
+                        LastName = editModel.LastName,
+                        Birthday = editModel.Birthday
+                    };
+                    
+                    _context.Update(artist);
+                    _context.SaveChanges();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!ArtistExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
             return View(editModel);
         }
 
@@ -185,46 +211,9 @@ namespace MoviesApp.Controllers
             }
         }
 
-        // POST: Movies/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var artist = new Artist
-                    {
-                        Id = id,
-                        FirstName = editModel.FirstName,
-                        LastName = editModel.LastName,
-                        Birthday = editModel.Birthday
-                    };
-                    
-                    _context.Update(artist);
-                    _context.SaveChanges();
-                }
-                catch (DbUpdateException)
-                {
-                    if (!ArtistExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(editModel);
-        }
+        
         
         [HttpGet]
-        // GET: Movies/Delete/5
         public IActionResult Delete(int? id)
         {
             if (id == null)
@@ -247,7 +236,6 @@ namespace MoviesApp.Controllers
             return View(deleteModel);
         }
         
-        // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
