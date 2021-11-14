@@ -103,14 +103,7 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-        
-            /*var editModel = _context.Artists.Where(m => m.Id == id).Select(m => new Artist
-            {
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                Birthday = m.Birthday,
-                MoviesArtists = m.MoviesArtists
-            }).FirstOrDefault();*/
+            
             var editModel = _context.Artists.Include(a => a.MoviesArtists)
                 .ThenInclude(ma => ma.Movie).AsNoTracking().SingleOrDefault(a => a.Id == id);
 
@@ -217,8 +210,6 @@ namespace MoviesApp.Controllers
             }
         }
 
-        
-        
         [HttpGet]
         public IActionResult Delete(int? id)
         {

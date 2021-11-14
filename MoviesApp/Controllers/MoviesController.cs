@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,6 @@ namespace MoviesApp.Controllers
             return View(viewModel);
         }
 
-        // GET: Movies/Details/5
         [HttpGet]
         public IActionResult Details(int? id)
         {
@@ -69,14 +69,17 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
+            /*var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
             {
                 Id = m.Id,
                 Genre = m.Genre,
                 Price = m.Price,
                 Title = m.Title,
                 ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            }).FirstOrDefault();*/
+            var viewModel = _context.Movies
+                .Include(m => m.MoviesArtists)
+                .ThenInclude(ma => ma.Artist).SingleOrDefault(m=>m.Id == id);
 
             
             if (viewModel == null)
@@ -87,38 +90,98 @@ namespace MoviesApp.Controllers
             return View(viewModel);
         }
         
-        // GET: Movies/Create
         [HttpGet]
         public IActionResult Create()
         {
+            Movie movie = new Movie();
+            PopulateAssignedMovieData(movie);
             return View();
         }
 
-        // POST: Movies/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] InputMovieViewModel inputModel)
+        public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] 
+            Movie inputModel, string[] selectedOptions)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(new Movie
-                {
-                    Genre = inputModel.Genre,
-                    Price = inputModel.Price,
-                    Title = inputModel.Title,
-                    ReleaseDate = inputModel.ReleaseDate
-                });
+                _context.Add(inputModel);
                 _context.SaveChanges();
-
+                if (selectedOptions != null)
+                {
+                    foreach (var artist in selectedOptions)
+                    {
+                        var artistToAdd = new MoviesArtist
+                        {
+                            ArtistId = int.Parse(artist),
+                            MovieId = inputModel.Id
+                        };
+                        _context.MoviesArtists.Add(artistToAdd);
+                        _context.SaveChanges();
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
+            PopulateAssignedMovieData(inputModel);
             return View(inputModel);
         }
         
+        private void PopulateAssignedMovieData(Movie movie)
+        {
+            var allOptions = _context.Artists;
+            var currentOptionIDs = new HashSet<int>(movie.MoviesArtists.Select(m => m.ArtistId));
+            var checkBoxes = new List<OptionVModelMovie>();
+            foreach (var option in allOptions)
+            {
+                checkBoxes.Add(new OptionVModelMovie
+                {
+                    Id = option.Id,
+                    Name = option.FirstName + " " + option.LastName,
+                    Assigned = currentOptionIDs.Contains(option.Id)
+                });
+            }
+            
+            ViewData["ArtistOptions"] = checkBoxes;
+        }
+
+        private void UpdateMoviesArtists(string[] selectedOptions, Movie movieToUpdate)
+        {
+            if (selectedOptions == null)
+            {
+                movieToUpdate.MoviesArtists = new List<MoviesArtist>();
+                return;
+            }
+
+            var selectedOptionsHS = new HashSet<string>(selectedOptions);
+            var movieOptionsHS = new HashSet<int>(movieToUpdate.MoviesArtists
+                .Select(m => m.ArtistId));
+            foreach (var option in _context.Artists)
+            {
+                if (selectedOptionsHS.Contains(option.Id.ToString())) // чекбокс выделен
+                {
+                    if (!movieOptionsHS.Contains(option.Id)) // но не отображено в таблице многие-ко-многим
+                    {
+                        movieToUpdate.MoviesArtists.Add(new MoviesArtist
+                        {
+                            MovieId = movieToUpdate.Id,
+                            ArtistId = option.Id
+                        });
+                    }
+                }
+                else
+                {
+                    // чекбокс не выделен
+                    if (movieOptionsHS.Contains(option.Id)) // но в таблице многие-ко-многим такое отношение было
+                    {
+                        MoviesArtist movieToRemove = movieToUpdate.MoviesArtists
+                            .SingleOrDefault(m => m.ArtistId == option.Id);
+                        _context.MoviesArtists.Remove(movieToRemove ?? throw new InvalidOperationException());
+                    }
+                }
+            }
+        }
+        
         [HttpGet]
-        // GET: Movies/Edit/5
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -126,43 +189,40 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _context.Movies.Where(m => m.Id == id).Select(m => new EditMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            var editModel = _context.Movies
+                .Include(m => m.MoviesArtists)
+                .ThenInclude(ma => ma.Artist).AsNoTracking().SingleOrDefault(m => m.Id == id);
             
             if (editModel == null)
             {
                 return NotFound();
             }
-            
+            PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
-
-        // POST: Movies/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] EditMovieViewModel editModel)
+        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] 
+            Movie editModel, string[] selectedOptions)
         {
+            var movieToUpdate = _context.Movies
+                .Include(m => m.MoviesArtists)
+                .ThenInclude(am => am.Artist)
+                .SingleOrDefault(m => m.Id == id);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var movie = new Movie
+                    UpdateMoviesArtists(selectedOptions, movieToUpdate);
+                    if (movieToUpdate != null)
                     {
-                        Id = id,
-                        Genre = editModel.Genre,
-                        Price = editModel.Price,
-                        Title = editModel.Title,
-                        ReleaseDate = editModel.ReleaseDate
-                    };
-                    
-                    _context.Update(movie);
+                        movieToUpdate.Title = editModel.Title;
+                        movieToUpdate.Genre = editModel.Genre;
+                        movieToUpdate.ReleaseDate = editModel.ReleaseDate;
+                        movieToUpdate.Price = editModel.Price;
+                        _context.Update(movieToUpdate);
+                    }
                     _context.SaveChanges();
                 }
                 catch (DbUpdateException)
@@ -178,6 +238,7 @@ namespace MoviesApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
         

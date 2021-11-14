@@ -1,4 +1,5 @@
-@model MoviesApp.ViewModels.InputMovieViewModel
+@using MoviesApp.ViewModels
+@model MoviesApp.Models.Movie
 
 @{
     ViewData["Title"] = "Create";
@@ -7,33 +8,61 @@
 <h1>Create</h1>
 
 <h4>Movie</h4>
-<hr />
+<hr/>
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control"/>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ReleaseDate" class="control-label"></label>
-                <input asp-for="ReleaseDate" asp-format="{0:dd.MM.yyyy}" class="form-control" />
+                <input asp-for="ReleaseDate" asp-format="{0:dd.MM.yyyy}" class="form-control"/>
                 <span asp-validation-for="ReleaseDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Genre" class="control-label"></label>
-                <input asp-for="Genre" class="form-control" />
+                <input asp-for="Genre" class="form-control"/>
                 <span asp-validation-for="Genre" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
+                <input asp-for="Price" class="form-control"/>
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <label class="control-label">@Html.DisplayNameFor(model => model.MoviesArtists)</label>
+                <div class="col-md-offset-1">
+                    <table>
+                        <tr>
+                        @{
+                            int cnt = 0;
+                            List<OptionVModelMovie> checkboxes = ViewBag.ArtistOptions;
+                            foreach (var checkbox in checkboxes)
+                            {
+                                if (cnt++ % 1 == 0)
+                                {
+                                    @:</tr><tr>
+                                }
+                                @:<td>
+                                <input type="checkbox"
+                                       name="selectedOptions"
+                                       value="@checkbox.Id"
+                                       @(Html.Raw(checkbox.Assigned ? "checked=\"checked\"" : ""))/>
+                                @checkbox.Name
+                                @:&nbsp;&nbsp;
+                                @:</td>
+                            }
+                            @:</tr>
+                        }
+                    </table>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary"/>
             </div>
         </form>
     </div>
@@ -44,5 +73,5 @@
 </div>
 
 @section Scripts {
-    @{Html.RenderPartial("_ValidationScriptsPartial");}
+    @{ Html.RenderPartial("_ValidationScriptsPartial"); }
 }
