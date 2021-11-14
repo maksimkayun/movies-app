@@ -104,38 +104,45 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
         
-            var editModel = _context.Artists.Where(m => m.Id == id).Select(m => new EditArtistViewModel
+            /*var editModel = _context.Artists.Where(m => m.Id == id).Select(m => new Artist
             {
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday,
-            }).FirstOrDefault();
-            
+                MoviesArtists = m.MoviesArtists
+            }).FirstOrDefault();*/
+            var editModel = _context.Artists.Include(a => a.MoviesArtists)
+                .ThenInclude(ma => ma.Movie).AsNoTracking().SingleOrDefault(a => a.Id == id);
+
             if (editModel == null)
             {
                 return NotFound();
             }
-            
+            PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel)
+        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] 
+            Artist editModel, string[] selectedOptions)
         {
+            var artistToUpdate = _context.Artists
+                .Include(a => a.MoviesArtists)
+                .ThenInclude(am => am.Movie)
+                .SingleOrDefault(a => a.Id == id);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var artist = new Artist
+                    UpdateMoviesArtists(selectedOptions, artistToUpdate);
+                    if (artistToUpdate != null)
                     {
-                        Id = id,
-                        FirstName = editModel.FirstName,
-                        LastName = editModel.LastName,
-                        Birthday = editModel.Birthday
-                    };
-                    
-                    _context.Update(artist);
+                        artistToUpdate.FirstName = editModel.FirstName;
+                        artistToUpdate.LastName = editModel.LastName;
+                        artistToUpdate.Birthday = editModel.Birthday;
+                        _context.Update(artistToUpdate);
+                    }
                     _context.SaveChanges();
                 }
                 catch (DbUpdateException)
@@ -151,6 +158,7 @@ namespace MoviesApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
 
@@ -194,7 +202,6 @@ namespace MoviesApp.Controllers
                             ArtistId = artistToUpdate.Id,
                             MovieId = option.Id
                         });
-                        _context.SaveChanges();
                     }
                 }
                 else
@@ -205,7 +212,6 @@ namespace MoviesApp.Controllers
                         MoviesArtist movieToRemove = artistToUpdate.MoviesArtists
                             .SingleOrDefault(m => m.MovieId == option.Id);
                         _context.MoviesArtists.Remove(movieToRemove ?? throw new InvalidOperationException());
-                        _context.SaveChanges();
                     }
                 }
             }
