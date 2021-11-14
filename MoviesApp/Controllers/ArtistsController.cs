@@ -34,26 +34,6 @@ namespace MoviesApp.Controllers
                 Birthday = m.Birthday
             }).ToList());
         }
-        
-        [HttpGet]
-        public IActionResult Films(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            IEnumerable<FilmsViewModel> viewModel = (_context.MoviesArtists.Where(ma => ma.ArtistId == id)
-                .Select(m => new FilmsViewModel
-                {
-                    Title = m.Movie.Title,
-                    ReleaseDate = m.Movie.ReleaseDate,
-                    Genre = m.Movie.Genre,
-                    Price = m.Movie.Price
-                })).ToList();
-
-            return View(viewModel);
-        }
 
         // GET: Movies/Details/5
         [HttpGet]
@@ -70,7 +50,8 @@ namespace MoviesApp.Controllers
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday,
-                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m.Movie)
+                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m.Movie),
+                MoviesArtists = (ICollection<MoviesArtist>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m)
             }).FirstOrDefault();
         
             
@@ -86,29 +67,41 @@ namespace MoviesApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            var artist = new Artist();
+            PopulateAssignedMovieData(artist);
             return View();
         }
+
 
         // POST: Movies/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("FirstName,LastName,Birthday")] InputArtistViewModel inputModel)
+        public IActionResult Create([Bind("FirstName,LastName,Birthday")] 
+            Artist artist, string[] selectedOptions)
         {
             if (ModelState.IsValid)
             {
-                _context.Artists.Add(new Artist
-                {
-                    FirstName = inputModel.FirstName,
-                    LastName = inputModel.LastName,
-                    Birthday = inputModel.Birthday
-                });
+                _context.Artists.Add(artist);
                 _context.SaveChanges();
-
+                if (selectedOptions != null)
+                {
+                    foreach (var movie in selectedOptions)
+                    {
+                        var movieToAdd = new MoviesArtist
+                        {
+                            ArtistId = artist.Id,
+                            MovieId = int.Parse(movie)
+                        };
+                        _context.MoviesArtists.Add(movieToAdd);
+                        _context.SaveChanges();
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
-            return View(inputModel);
+            PopulateAssignedMovieData(artist);
+            return View(artist);
         }
         
         // [HttpGet]
@@ -124,7 +117,7 @@ namespace MoviesApp.Controllers
             {
                 FirstName = m.FirstName,
                 LastName = m.LastName,
-                Birthday = m.Birthday
+                Birthday = m.Birthday,
             }).FirstOrDefault();
             
             if (editModel == null)
@@ -133,6 +126,63 @@ namespace MoviesApp.Controllers
             }
             
             return View(editModel);
+        }
+
+        private void PopulateAssignedMovieData(Artist artist)
+        {
+            var allOptions = _context.Movies;
+            var currentOptionIDs = new HashSet<int>(artist.MoviesArtists.Select(m => m.MovieId));
+            var checkBoxes = new List<OptionVMArtist>();
+            foreach (var option in allOptions)
+            {
+                checkBoxes.Add(new OptionVMArtist
+                {
+                    Id = option.Id,
+                    Name = option.Title,
+                    Assigned = currentOptionIDs.Contains(option.Id)
+                });
+            }
+            
+            ViewData["MovieOptions"] = checkBoxes;
+        }
+
+        private void UpdateMoviesArtists(string[] selectedOptions, Artist artistToUpdate)
+        {
+            if (selectedOptions == null)
+            {
+                artistToUpdate.MoviesArtists = new List<MoviesArtist>();
+                return;
+            }
+
+            var selectedOptionsHS = new HashSet<string>(selectedOptions);
+            var artistOptionsHS = new HashSet<int>(artistToUpdate.MoviesArtists
+                .Select(m => m.MovieId));
+            foreach (var option in _context.Movies)
+            {
+                if (selectedOptionsHS.Contains(option.Id.ToString())) // чекбокс выделен
+                {
+                    if (!artistOptionsHS.Contains(option.Id)) // но не отображено в таблице многие-ко-многим
+                    {
+                        artistToUpdate.MoviesArtists.Add(new MoviesArtist
+                        {
+                            ArtistId = artistToUpdate.Id,
+                            MovieId = option.Id
+                        });
+                        _context.SaveChanges();
+                    }
+                }
+                else
+                {
+                    // чекбокс не выделен
+                    if (artistOptionsHS.Contains(option.Id)) // но в таблице многие-ко-многим такое отношение было
+                    {
+                        MoviesArtist movieToRemove = artistToUpdate.MoviesArtists
+                            .SingleOrDefault(m => m.MovieId == option.Id);
+                        _context.MoviesArtists.Remove(movieToRemove ?? throw new InvalidOperationException());
+                        _context.SaveChanges();
+                    }
+                }
+            }
         }
 
         // POST: Movies/Edit/5

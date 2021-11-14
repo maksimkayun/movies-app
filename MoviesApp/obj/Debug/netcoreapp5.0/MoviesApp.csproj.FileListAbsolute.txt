@@ -156,5 +156,4 @@ C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\Movies
 C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\ref\MoviesApp.dll
 C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.pdb
 C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.genruntimeconfig.cache
-C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Artists\Films.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\MoviesApp\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Movies\Artists.cshtml.g.cs

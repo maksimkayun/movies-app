@@ -37,35 +37,35 @@
     <thead>
     <tr>
         <th>
-            <label asp-for="@Model.Movies.FirstOrDefault().Title"></label>
+            <label asp-for="@Model.MoviesArtists.FirstOrDefault().Movie.Title"></label>
         </th>
         <th>
-            <label asp-for="@Model.Movies.FirstOrDefault().ReleaseDate"></label>
+            <label asp-for="@Model.MoviesArtists.FirstOrDefault().Movie.ReleaseDate"></label>
         </th>
         <th>
-            <label asp-for="@Model.Movies.FirstOrDefault().Genre"></label>
+            <label asp-for="@Model.MoviesArtists.FirstOrDefault().Movie.Genre"></label>
         </th>
         <th>
-            <label asp-for="@Model.Movies.FirstOrDefault().Price"></label>
+            <label asp-for="@Model.MoviesArtists.FirstOrDefault().Movie.Price"></label>
         </th>
         <th></th>
     </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.Movies)
+    @foreach (var item in Model.MoviesArtists)
     {
         <tr>
             <td>
-                @item.Title
+                @item.Movie.Title
             </td>
             <td>
-                @item.ReleaseDate.ToString("dd.MM.yyyy")
+                @item.Movie.ReleaseDate.ToString("dd.MM.yyyy")
             </td>
             <td>
-                @item.Genre
+                @item.Movie.Genre
             </td>
             <td>
-                @item.Price
+                @item.Movie.Price
             </td>
         </tr>
     }
