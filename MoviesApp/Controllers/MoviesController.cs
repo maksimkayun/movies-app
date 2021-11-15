@@ -69,17 +69,21 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            /*var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
+            var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
             {
                 Id = m.Id,
                 Genre = m.Genre,
                 Price = m.Price,
                 Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();*/
-            var viewModel = _context.Movies
+                ReleaseDate = m.ReleaseDate,
+                Artists = (ICollection<Artist>) m.MoviesArtists.Where(ma => ma.MovieId == id)
+                    .Select(m => m.Artist),
+                MoviesArtists = (ICollection<MoviesArtist>) m.MoviesArtists.Where(ma => ma.MovieId == id)
+                    .Select(m => m)
+            }).FirstOrDefault();
+            /*var viewModel = _context.Movies
                 .Include(m => m.MoviesArtists)
-                .ThenInclude(ma => ma.Artist).SingleOrDefault(m=>m.Id == id);
+                .ThenInclude(ma => ma.Artist).SingleOrDefault(m=>m.Id == id);*/
 
             
             if (viewModel == null)
@@ -93,7 +97,7 @@ namespace MoviesApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            Movie movie = new Movie();
+            InputMovieViewModel movie = new InputMovieViewModel();
             PopulateAssignedMovieData(movie);
             return View();
         }
@@ -101,11 +105,19 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] 
-            Movie inputModel, string[] selectedOptions)
+            InputMovieViewModel inputModel, string[] selectedOptions)
         {
+            var newMovie = new Movie
+            {
+                Title = inputModel.Title,
+                Genre = inputModel.Genre,
+                ReleaseDate = inputModel.ReleaseDate,
+                Price = inputModel.Price,
+                MoviesArtists = inputModel.MoviesArtists
+            };
             if (ModelState.IsValid)
             {
-                _context.Add(inputModel);
+                _context.Add(newMovie);
                 _context.SaveChanges();
                 if (selectedOptions != null)
                 {
@@ -114,7 +126,7 @@ namespace MoviesApp.Controllers
                         var artistToAdd = new MoviesArtist
                         {
                             ArtistId = int.Parse(artist),
-                            MovieId = inputModel.Id
+                            MovieId = newMovie.Id
                         };
                         _context.MoviesArtists.Add(artistToAdd);
                         _context.SaveChanges();
@@ -126,7 +138,7 @@ namespace MoviesApp.Controllers
             return View(inputModel);
         }
         
-        private void PopulateAssignedMovieData(Movie movie)
+        private void PopulateAssignedMovieData(InputMovieViewModel movie)
         {
             var allOptions = _context.Artists;
             var currentOptionIDs = new HashSet<int>(movie.MoviesArtists.Select(m => m.ArtistId));
@@ -189,9 +201,18 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _context.Movies
+            /*var editModel = _context.Movies
                 .Include(m => m.MoviesArtists)
-                .ThenInclude(ma => ma.Artist).AsNoTracking().SingleOrDefault(m => m.Id == id);
+                .ThenInclude(ma => ma.Artist).AsNoTracking().SingleOrDefault(m => m.Id == id);*/
+            var editModel = _context.Movies.Where(m => m.Id == id).AsNoTracking()
+                .Select(m => new EditMovieViewModel
+                {
+                    Title = m.Title,
+                    Genre = m.Genre,
+                    ReleaseDate = m.ReleaseDate,
+                    Price = m.Price,
+                    MoviesArtists = m.MoviesArtists
+                }).FirstOrDefault();
             
             if (editModel == null)
             {
@@ -204,7 +225,7 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] 
-            Movie editModel, string[] selectedOptions)
+            EditMovieViewModel editModel, string[] selectedOptions)
         {
             var movieToUpdate = _context.Movies
                 .Include(m => m.MoviesArtists)

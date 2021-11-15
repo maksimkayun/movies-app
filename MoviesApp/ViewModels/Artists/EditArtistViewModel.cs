@@ -1,6 +1,6 @@
 ﻿namespace MoviesApp.ViewModels
 {
-    public class EditArtistViewModel: InputArtistViewModel
+    public class EditArtistViewModel : InputArtistViewModel
     {
         public EditArtistViewModel() : base()
         {

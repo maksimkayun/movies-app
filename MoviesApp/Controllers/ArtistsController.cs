@@ -10,7 +10,7 @@ using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
-    public class ArtistsController: Controller
+    public class ArtistsController : Controller
     {
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
@@ -21,19 +21,19 @@ namespace MoviesApp.Controllers
             _context = context;
             _logger = logger;
         }
-        
+
         [HttpGet]
         public IActionResult Index()
         {
             return View(_context.Artists.Select(m => new ArtistViewModel
             {
-                Id = m.Id, 
+                Id = m.Id,
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday
             }).ToList());
         }
-        
+
         [HttpGet]
         public IActionResult Details(int? id)
         {
@@ -41,42 +41,51 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-        
+
             var viewModel = _context.Artists.Where(m => m.Id == id).Select(m => new ArtistViewModel
             {
                 Id = m.Id,
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday,
-                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m.Movie),
-                MoviesArtists = (ICollection<MoviesArtist>) m.MoviesArtists.Where(ma => ma.ArtistId == id).Select(m => m)
+                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id)
+                    .Select(m => m.Movie),
+                MoviesArtists = (ICollection<MoviesArtist>) m.MoviesArtists.Where(ma => ma.ArtistId == id)
+                    .Select(m => m)
             }).FirstOrDefault();
-        
-            
+
+
             if (viewModel == null)
             {
                 return NotFound();
             }
-        
+
             return View(viewModel);
         }
-        
+
         [HttpGet]
         public IActionResult Create()
         {
-            var artist = new Artist();
+            var artist = new InputArtistViewModel();
             PopulateAssignedMovieData(artist);
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("FirstName,LastName,Birthday")] 
-            Artist artist, string[] selectedOptions)
+        public IActionResult Create([Bind("FirstName,LastName,Birthday")] InputArtistViewModel artist,
+            string[] selectedOptions)
         {
+            var newArtist = new Artist
+            {
+                FirstName = artist.FirstName,
+                LastName = artist.LastName,
+                Birthday = artist.Birthday,
+                MoviesArtists = artist.MoviesArtists
+            };
             if (ModelState.IsValid)
             {
-                _context.Artists.Add(artist);
+                _context.Artists.Add(newArtist);
                 _context.SaveChanges();
                 if (selectedOptions != null)
                 {
@@ -84,41 +93,52 @@ namespace MoviesApp.Controllers
                     {
                         var movieToAdd = new MoviesArtist
                         {
-                            ArtistId = artist.Id,
+                            ArtistId = newArtist.Id,
                             MovieId = int.Parse(movie)
                         };
                         _context.MoviesArtists.Add(movieToAdd);
                         _context.SaveChanges();
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             PopulateAssignedMovieData(artist);
             return View(artist);
         }
-        
+
         public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            
-            var editModel = _context.Artists.Include(a => a.MoviesArtists)
-                .ThenInclude(ma => ma.Movie).AsNoTracking().SingleOrDefault(a => a.Id == id);
+
+            /*var editModel = _context.Artists.Include(a => a.MoviesArtists)
+                .ThenInclude(ma => ma.Movie).AsNoTracking().SingleOrDefault(a => a.Id == id);*/
+            var editModel = _context.Artists.Where(m => m.Id == id).AsNoTracking()
+                .Select(m => new EditArtistViewModel
+                {
+                    FirstName = m.FirstName,
+                    LastName = m.LastName,
+                    Birthday = m.Birthday,
+                    MoviesArtists = m.MoviesArtists
+                }).FirstOrDefault();
 
             if (editModel == null)
             {
                 return NotFound();
             }
+
             PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] 
-            Artist editModel, string[] selectedOptions)
+        public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel,
+            string[] selectedOptions)
         {
             var artistToUpdate = _context.Artists
                 .Include(a => a.MoviesArtists)
@@ -136,6 +156,7 @@ namespace MoviesApp.Controllers
                         artistToUpdate.Birthday = editModel.Birthday;
                         _context.Update(artistToUpdate);
                     }
+
                     _context.SaveChanges();
                 }
                 catch (DbUpdateException)
@@ -149,13 +170,15 @@ namespace MoviesApp.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             PopulateAssignedMovieData(editModel);
             return View(editModel);
         }
 
-        private void PopulateAssignedMovieData(Artist artist)
+        private void PopulateAssignedMovieData(InputArtistViewModel artist)
         {
             var allOptions = _context.Movies;
             var currentOptionIDs = new HashSet<int>(artist.MoviesArtists.Select(m => m.MovieId));
@@ -169,7 +192,7 @@ namespace MoviesApp.Controllers
                     Assigned = currentOptionIDs.Contains(option.Id)
                 });
             }
-            
+
             ViewData["MovieOptions"] = checkBoxes;
         }
 
@@ -217,22 +240,22 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-        
+
             var deleteModel = _context.Artists.Where(m => m.Id == id).Select(m => new DeleteArtistViewModel
             {
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday
             }).FirstOrDefault();
-            
+
             if (deleteModel == null)
             {
                 return NotFound();
             }
-        
+
             return View(deleteModel);
         }
-        
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
@@ -244,6 +267,7 @@ namespace MoviesApp.Controllers
             {
                 _context.MoviesArtists.Remove(elem);
             }
+
             _context.Artists.Remove(artist);
             _context.SaveChanges();
             _logger.LogError($"Artist with id {artist.Id} has been deleted!");
