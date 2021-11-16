@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MoviesApp.Data;
+using MoviesApp.Middlewares;
 
 namespace MoviesApp
 {
@@ -41,7 +42,7 @@ namespace MoviesApp
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

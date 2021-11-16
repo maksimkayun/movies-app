@@ -1,0 +1,21 @@
+01.01.0001 0:00:00
+https localhost:5001/Artists/Details/28  
+
+01.01.0001 0:00:00
+https localhost:5001/Artists  
+
+2021-11-16 16:07:15 :: 
+https localhost:5001/Artists  
+
+2021-11-16 16:07:16 :: 
+https localhost:5001/Artists/Details/12  
+
+2021-11-16 16:07:18 :: 
+https localhost:5001/Artists/Edit/12  
+
+2021-11-16 16:07:19 :: 
+https localhost:5001/Artists  
+
+2021-11-16 16:07:20 :: 
+https localhost:5001/Artists/Create  
+
