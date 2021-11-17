@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MoviesApp.Controllers;
 using MoviesApp.Data;
 using MoviesApp.Middlewares;
 
@@ -42,6 +43,7 @@ namespace MoviesApp
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();

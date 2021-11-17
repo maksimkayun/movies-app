@@ -4,10 +4,49 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
+using MoviesApp.Controllers;
 
 namespace MoviesApp.Middlewares
 {
+    /*public class RequestResponseLoggingMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
+
+        public RequestResponseLoggingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
+        {
+            _next = next;
+            _logger = loggerFactory.CreateLogger<RequestResponseLoggingMiddleware>();
+        }
+    
+        public async Task Invoke(HttpContext context)
+        {
+            string str = FormatRequest(context.Request).ToString();
+            if (str != null && str.Contains("/Artists"))
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(str);
+                StreamWriter writer = new StreamWriter("log1.txt", true);
+                writer.WriteLine(context.Request);
+                writer.Close();
+            }
+            
+            await _next(context);
+        }
+    
+        private async Task<string> FormatRequest(HttpRequest request)
+        {
+            var body = request.Body;
+
+            var buffer = new byte[Convert.ToInt32(request.ContentLength)];
+            await request.Body.ReadAsync(buffer, 0, buffer.Length);
+            var bodyAsText = Encoding.UTF8.GetString(buffer);
+            request.Body = body;
+
+            return $"{request.Scheme} {request.Host}{request.Path} {request.QueryString} {bodyAsText}";
+        }
+    }*/
+    
     public class RequestResponseLoggingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -21,7 +60,7 @@ namespace MoviesApp.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-            StringBuilder sb = new StringBuilder();
+            /*StringBuilder sb = new StringBuilder();
             //First, get the incoming request
             var request = await FormatRequest(context.Request);
             if (request.Contains("/Artists"))
@@ -31,7 +70,7 @@ namespace MoviesApp.Middlewares
                 writer.WriteLine(dt);
                 await writer.WriteLineAsync(request + '\n');
                 writer.Close();
-            }
+            }*/
             //Copy a pointer to the original response body stream
             var originalBodyStream = context.Response.Body;
 

@@ -1,21 +1,30 @@
-01.01.0001 0:00:00
-https localhost:5001/Artists/Details/28  
-
-01.01.0001 0:00:00
+2021-11-17 12:51:40 :: 
 https localhost:5001/Artists  
 
-2021-11-16 16:07:15 :: 
-https localhost:5001/Artists  
-
-2021-11-16 16:07:16 :: 
+2021-11-17 12:51:41 :: 
 https localhost:5001/Artists/Details/12  
 
-2021-11-16 16:07:18 :: 
+2021-11-17 12:51:50 :: 
 https localhost:5001/Artists/Edit/12  
 
-2021-11-16 16:07:19 :: 
+2021-11-17 12:51:53 :: 
+https localhost:5001/Artists/Edit/12  FirstName=Angelina&LastName=Jolie&Birthday=1975-06-04&selectedOptions=1&selectedOptions=3&selectedOptions=1004&__RequestVerificationToken=CfDJ8NaRa-C_Ij1NrtrHVFxI5P3O7j6oGd2jv4B96hFg0N7TVI31hKspj1P7SGCsmLXJj2Gup7kQjflRg2xunqM7QzBaov09D3frUHxkhiZmv0PSrilbnfcb4LVAfipPCDVLMtvXRunlbs0iK-ugRrvX-U8
+
+2021-11-17 12:52:55 :: 
 https localhost:5001/Artists  
 
-2021-11-16 16:07:20 :: 
+2021-11-17 12:52:55 :: 
+https localhost:5001/Artists/Details/12  
+
+2021-11-17 12:53:00 :: 
+https localhost:5001/Artists/Edit/12  
+
+2021-11-17 12:53:02 :: 
+https localhost:5001/Artists  
+
+2021-11-17 12:53:03 :: 
 https localhost:5001/Artists/Create  
+
+2021-11-17 12:53:11 :: 
+https localhost:5001/Artists/Create  FirstName=Malloc&LastName=Izran&Birthday=1949-01-01&selectedOptions=1&__RequestVerificationToken=CfDJ8NaRa-C_Ij1NrtrHVFxI5P18SGwO0VE2ptaoE96XL0I5z43FM0QxAMGFJ3HwntmdBtg1kdVFwmgjch5hMi_VXL9tPW1Tlj5dli3fwiq_p8tT9nd38PfxEXWuKw-iCsy9Re3cmog1NkuW-ryOIqIkCAk
 
