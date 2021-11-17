@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
 using MoviesApp.Models;
+using MoviesApp.Validation;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
@@ -73,6 +74,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AgeOfTheArtist]
         public IActionResult Create([Bind("FirstName,LastName,Birthday")] InputArtistViewModel artist,
             string[] selectedOptions)
         {
@@ -107,7 +109,8 @@ namespace MoviesApp.Controllers
             PopulateAssignedMovieData(artist);
             return View(artist);
         }
-
+        
+        [HttpGet]
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -137,6 +140,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AgeOfTheArtist]
         public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel,
             string[] selectedOptions)
         {
