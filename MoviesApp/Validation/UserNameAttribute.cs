@@ -4,19 +4,18 @@ namespace MoviesApp.Validation
 {
     public class UserNameAttribute : ValidationAttribute
     {
-        private string name;
-        private readonly int length;
+        private readonly int _length;
 
         public UserNameAttribute(int length)
         {
-            this.length = length;
+            _length = length;
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            if (value.ToString()?.Length < length)
+            if (value.ToString()?.Length < _length)
             {
-                return new ValidationResult($"The length of the name must be greater than {length - 1}!");
+                return new ValidationResult($"The length of the name must be greater than {_length - 1}!");
             }
 
             return ValidationResult.Success;

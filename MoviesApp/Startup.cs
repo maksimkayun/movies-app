@@ -41,10 +41,9 @@ namespace MoviesApp
         {
             if (env.IsDevelopment())
             {
+                app.UseRequestResponseLogging();
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
