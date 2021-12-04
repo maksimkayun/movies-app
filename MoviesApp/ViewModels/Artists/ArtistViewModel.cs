@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using MoviesApp.Models;
 
 namespace MoviesApp.ViewModels
 {
@@ -9,7 +11,6 @@ namespace MoviesApp.ViewModels
         public ArtistViewModel() : base()
         {
         }
-
         public int Id { get; set; }
     }
 }

@@ -37,31 +37,6 @@ namespace MoviesApp.Controllers
         }
         
         [HttpGet]
-        public IActionResult Artists(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var viewModel = _context.MoviesArtists.Where(ma => ma.MovieId == id)
-                .Select(a => new ArtistsViewModel
-                {
-                    FirstName = a.Artist.FirstName,
-                    LastName = a.Artist.LastName,
-                    Birthday = a.Artist.Birthday
-                }).ToList();
-
-            
-            if (viewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(viewModel);
-        }
-
-        [HttpGet]
         public IActionResult Details(int? id)
         {
             if (id == null)

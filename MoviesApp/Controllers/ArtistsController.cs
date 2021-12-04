@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,24 +16,33 @@ namespace MoviesApp.Controllers
     {
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
+        private readonly IMapper _mapper;
 
-
-        public ArtistsController(MoviesContext context, ILogger<HomeController> logger)
+        public ArtistsController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
-            return View(_context.Artists.Select(m => new ArtistViewModel
+            var artists = _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistViewModel>>(_context.Artists.ToList());
+
+            #region without mapper
+
+            /*return View(_context.Artists.Select(m => new ArtistViewModel
             {
                 Id = m.Id,
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday
-            }).ToList());
+            }).ToList());*/
+
+            #endregion
+
+            return View(artists);
         }
 
         [HttpGet]
@@ -43,18 +53,11 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _context.Artists.Where(m => m.Id == id).Select(m => new ArtistViewModel
-            {
-                Id = m.Id,
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                Birthday = m.Birthday,
-                Movies = (ICollection<Movie>) m.MoviesArtists.Where(ma => ma.ArtistId == id)
-                    .Select(m => m.Movie),
-                MoviesArtists = (ICollection<MoviesArtist>) m.MoviesArtists.Where(ma => ma.ArtistId == id)
-                    .Select(m => m)
-            }).FirstOrDefault();
-
+            var viewModel = _mapper.Map<Artist, ArtistViewModel>(
+                _context.Artists.Include(ng => ng.MoviesArtists)
+                    .ThenInclude(ng => ng.Movie)
+                    .SingleOrDefault(art => art.Id == id)
+            );
 
             if (viewModel == null)
             {
@@ -78,13 +81,19 @@ namespace MoviesApp.Controllers
         public IActionResult Create([Bind("FirstName,LastName,Birthday")] InputArtistViewModel artist,
             string[] selectedOptions)
         {
-            var newArtist = new Artist
+            #region without mapper
+
+            /*var newArtist = new Artist
             {
                 FirstName = artist.FirstName,
                 LastName = artist.LastName,
                 Birthday = artist.Birthday,
                 MoviesArtists = artist.MoviesArtists
-            };
+            };*/
+
+            #endregion
+
+            Artist newArtist = _mapper.Map<InputArtistViewModel, Artist>(artist);
             if (ModelState.IsValid)
             {
                 _context.Artists.Add(newArtist);
@@ -109,7 +118,7 @@ namespace MoviesApp.Controllers
             PopulateAssignedMovieData(artist);
             return View(artist);
         }
-        
+
         [HttpGet]
         public IActionResult Edit(int? id)
         {
@@ -120,14 +129,26 @@ namespace MoviesApp.Controllers
 
             /*var editModel = _context.Artists.Include(a => a.MoviesArtists)
                 .ThenInclude(ma => ma.Movie).AsNoTracking().SingleOrDefault(a => a.Id == id);*/
-            var editModel = _context.Artists.Where(m => m.Id == id).AsNoTracking()
+
+            EditArtistViewModel editModel = _mapper.Map<Artist, EditArtistViewModel>(
+                _context.Artists
+                    .Include(ng => ng.MoviesArtists)
+                    .ThenInclude(ng => ng.Movie)
+                    .FirstOrDefault(m => m.Id == id)
+            );
+
+            #region without mapper
+
+            /*var editModel = _context.Artists.Where(m => m.Id == id).AsNoTracking()
                 .Select(m => new EditArtistViewModel
                 {
                     FirstName = m.FirstName,
                     LastName = m.LastName,
                     Birthday = m.Birthday,
                     MoviesArtists = m.MoviesArtists
-                }).FirstOrDefault();
+                }).FirstOrDefault();*/
+
+            #endregion
 
             if (editModel == null)
             {
@@ -245,12 +266,22 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var deleteModel = _context.Artists.Where(m => m.Id == id).Select(m => new DeleteArtistViewModel
+            DeleteArtistViewModel deleteModel = _mapper.Map<Artist, DeleteArtistViewModel>(
+                _context.Artists.Include(ng => ng.MoviesArtists)
+                    .ThenInclude(ng => ng.Movie)
+                    .FirstOrDefault()
+            );
+
+            #region without mapper
+
+            /*var deleteModel = _context.Artists.Where(m => m.Id == id).Select(m => new DeleteArtistViewModel
             {
                 FirstName = m.FirstName,
                 LastName = m.LastName,
                 Birthday = m.Birthday
-            }).FirstOrDefault();
+            }).FirstOrDefault();*/
+
+            #endregion
 
             if (deleteModel == null)
             {

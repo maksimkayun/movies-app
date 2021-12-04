@@ -206,7 +206,6 @@ C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Movie
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.RazorAssemblyInfo.cache
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.RazorAssemblyInfo.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\staticwebassets\MoviesApp.StaticWebAssets.Manifest.cache
-C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\staticwebassets\MoviesApp.StaticWebAssets.xml
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\scopedcss\bundle\MoviesApp.styles.css
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.TagHelpers.input.cache
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.TagHelpers.output.cache
@@ -219,7 +218,6 @@ C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\HelloWorld\Index.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Home\Index.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Home\Privacy.cshtml.g.cs
-C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Movies\Artists.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Movies\Create.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Movies\Delete.cshtml.g.cs
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Razor\Views\Movies\Details.cshtml.g.cs
@@ -237,3 +235,5 @@ C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\Movie
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\ref\MoviesApp.dll
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.pdb
 C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\obj\Debug\netcoreapp5.0\MoviesApp.genruntimeconfig.cache
+C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\bin\Debug\netcoreapp5.0\AutoMapper.dll
+C:\Users\Dushevno\Desktop\GIT\movies-app\MoviesApp\bin\Debug\netcoreapp5.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

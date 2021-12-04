@@ -30,17 +30,17 @@ namespace MoviesApp.Middlewares
                     {
                         sb.AppendLine(v.Key + ": " + v.Value);
                     }
+
                     logger.LogInformation($"TypeRequest {httpContext.Request.Path}  Method: " +
                                           $"{httpContext.Request.Method} \n      Params:\n{sb}");
                 }
                 else
                 {
                     logger.LogInformation($"TypeRequest {httpContext.Request.Path}  Method: " +
-                                          $"{httpContext.Request.Method}"); 
+                                          $"{httpContext.Request.Method}");
                 }
-                
             }
-            
+
             await _next(httpContext);
         }
     }
