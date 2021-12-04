@@ -10,7 +10,6 @@ namespace MoviesApp.ViewModels
         public InputMovieViewModel()
         {
             MoviesArtists = new HashSet<MoviesArtist>();
-            Artists = new HashSet<Artist>();
         }
         public string Title { get; set; }
         
@@ -19,6 +18,5 @@ namespace MoviesApp.ViewModels
         public string Genre { get; set; }
         public decimal Price { get; set; }
         public ICollection<MoviesArtist> MoviesArtists { get; set; }
-        public ICollection<Artist> Artists { get; set; }
     }
 }

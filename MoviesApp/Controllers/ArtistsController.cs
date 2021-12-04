@@ -267,9 +267,10 @@ namespace MoviesApp.Controllers
             }
 
             DeleteArtistViewModel deleteModel = _mapper.Map<Artist, DeleteArtistViewModel>(
-                _context.Artists.Include(ng => ng.MoviesArtists)
+                _context.Artists
+                    .Include(ng => ng.MoviesArtists)
                     .ThenInclude(ng => ng.Movie)
-                    .FirstOrDefault()
+                    .FirstOrDefault(art => art.Id == id)
             );
 
             #region without mapper
