@@ -9,7 +9,11 @@ namespace MoviesApp.Services.Dto.AutoMapperProfiles
     {
         public MovieDtoProfile()
         {
-            CreateMap<Movie, MovieDto>().ReverseMap();
+            CreateMap<Movie, MovieDto>().ForMember(e => e.MoviesArtists,
+                opt => opt.MapFrom(m => m.MoviesArtists))
+                .ReverseMap()
+                .ForMember(e => e.MoviesArtists,
+                opt => opt.MapFrom(m => m.MoviesArtists));
         }
     }
 }

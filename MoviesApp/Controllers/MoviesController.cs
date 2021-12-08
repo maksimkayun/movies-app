@@ -168,43 +168,6 @@ namespace MoviesApp.Controllers
             ViewData["ArtistOptions"] = checkBoxes;
         }
 
-        private void UpdateMoviesArtists(string[] selectedOptions, Movie movieToUpdate)
-        {
-            if (selectedOptions == null)
-            {
-                movieToUpdate.MoviesArtists = new List<MoviesArtist>();
-                return;
-            }
-
-            var selectedOptionsHS = new HashSet<string>(selectedOptions);
-            var movieOptionsHS = new HashSet<int>(movieToUpdate.MoviesArtists
-                .Select(m => m.ArtistId));
-            foreach (var option in _context.Artists)
-            {
-                if (selectedOptionsHS.Contains(option.Id.ToString())) // чекбокс выделен
-                {
-                    if (!movieOptionsHS.Contains(option.Id)) // но не отображено в таблице многие-ко-многим
-                    {
-                        movieToUpdate.MoviesArtists.Add(new MoviesArtist
-                        {
-                            MovieId = movieToUpdate.Id,
-                            ArtistId = option.Id
-                        });
-                    }
-                }
-                else
-                {
-                    // чекбокс не выделен
-                    if (movieOptionsHS.Contains(option.Id)) // но в таблице многие-ко-многим такое отношение было
-                    {
-                        MoviesArtist movieToRemove = movieToUpdate.MoviesArtists
-                            .SingleOrDefault(m => m.ArtistId == option.Id);
-                        _context.MoviesArtists.Remove(movieToRemove ?? throw new InvalidOperationException());
-                    }
-                }
-            }
-        }
-
         [HttpGet]
         public IActionResult Edit(int? id)
         {
@@ -213,17 +176,19 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            EditMovieViewModel editModel = _mapper.Map<Movie, EditMovieViewModel>(
-                _context.Movies.Include(ng => ng.MoviesArtists)
-                    .ThenInclude(ng => ng.Artist)
-                    .FirstOrDefault(m => m.Id == id)
-            );
+            EditMovieViewModel editModel = _mapper.Map<EditMovieViewModel>(_service.GetMovie((int) id));
 
             #region without mapper
 
             /*var editModel = _context.Movies
                 .Include(m => m.MoviesArtists)
                 .ThenInclude(ma => ma.Artist).AsNoTracking().SingleOrDefault(m => m.Id == id);*/
+            
+            /*EditMovieViewModel editModel = _mapper.Map<Movie, EditMovieViewModel>(
+                _context.Movies.Include(ng => ng.MoviesArtists)
+                    .ThenInclude(ng => ng.Artist)
+                    .FirstOrDefault(m => m.Id == id)
+            );*/
 
             // or we can do this:
             /*var editModel = _context.Movies.Where(m => m.Id == id).AsNoTracking()
@@ -237,7 +202,6 @@ namespace MoviesApp.Controllers
                 }).FirstOrDefault();*/
 
             #endregion
-
 
             if (editModel == null)
             {
@@ -253,25 +217,30 @@ namespace MoviesApp.Controllers
         public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] EditMovieViewModel editModel,
             string[] selectedOptions)
         {
-            var movieToUpdate = _context.Movies
+            var movieToUpdate = _mapper.Map<EditMovieViewModel>(editModel);
+            //var movieToUpdate = _mapper.Map<MovieDto>(_service.UpdateMovie())
+            /*var movieToUpdate = _context.Movies
                 .Include(m => m.MoviesArtists)
                 .ThenInclude(am => am.Artist)
-                .SingleOrDefault(m => m.Id == id);
+                .SingleOrDefault(m => m.Id == id);*/
             if (ModelState.IsValid)
             {
                 try
                 {
-                    UpdateMoviesArtists(selectedOptions, movieToUpdate);
-                    if (movieToUpdate != null)
+                    var movieDto = _mapper.Map<MovieDto>(editModel);
+                    movieDto.SelectOptions = selectedOptions.ToList();
+                    movieDto.Id = id;
+                    movieToUpdate = _mapper.Map<EditMovieViewModel>(_service.UpdateMovie(movieDto));
+                    //Movie movieToUpdateCheckboxes = _mapper.Map<Movie>(movieToUpdate);
+                    /*if (movieToUpdate != null)
                     {
                         movieToUpdate.Title = editModel.Title;
                         movieToUpdate.Genre = editModel.Genre;
                         movieToUpdate.ReleaseDate = editModel.ReleaseDate;
                         movieToUpdate.Price = editModel.Price;
                         _context.Update(movieToUpdate);
-                    }
-
-                    _context.SaveChanges();
+                    }*/
+                    //_context.SaveChanges();
                 }
                 catch (DbUpdateException)
                 {
@@ -288,8 +257,8 @@ namespace MoviesApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateAssignedMovieData(editModel);
-            return View(editModel);
+            PopulateAssignedMovieData(movieToUpdate);
+            return View(movieToUpdate);
         }
 
         [HttpGet]

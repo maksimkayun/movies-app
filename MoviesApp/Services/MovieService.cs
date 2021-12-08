@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MoviesApp.Controllers;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
@@ -47,12 +49,22 @@ namespace MoviesApp.Services
             
             try
             {
-                var movie = _mapper.Map<Movie>(movieDto);
-                
-                _context.Update(movie);
-                _context.SaveChanges();
-                
-                return _mapper.Map<MovieDto>(movie);
+                var movieToUpdate = _context.Movies
+                    .Include(m => m.MoviesArtists)
+                    .ThenInclude(a=>a.Artist)
+                    .FirstOrDefault(m => m.Id == movieDto.Id);
+                UpdateMoviesArtists(movieDto.SelectOptions.ToArray(), movieToUpdate);
+                if (movieToUpdate != null)
+                {
+                    movieToUpdate.Title = movieDto.Title;
+                    movieToUpdate.Genre = movieDto.Genre;
+                    movieToUpdate.ReleaseDate = movieDto.ReleaseDate;
+                    movieToUpdate.Price = movieDto.Price;
+                    _context.Update(movieToUpdate);
+                    _context.SaveChanges();
+                }
+
+                return _mapper.Map<MovieDto>(movieToUpdate);
             }
             catch (DbUpdateException)
             {
@@ -97,6 +109,44 @@ namespace MoviesApp.Services
         private bool MovieExists(int id)
         {
             return _context.Movies.Any(e => e.Id == id);
+        }
+        
+        private void UpdateMoviesArtists(string[] selectedOptions, Movie movieToUpdate)
+        {
+            if (selectedOptions == null)
+            {
+                movieToUpdate.MoviesArtists = new List<MoviesArtist>();
+                return;
+            }
+
+            var selectedOptionsHS = new HashSet<string>(selectedOptions);
+            var movieOptionsHS = new HashSet<int>(movieToUpdate.MoviesArtists
+                .Select(m => m.ArtistId));
+            foreach (var option in _context.Artists)
+            {
+                if (selectedOptionsHS.Contains(option.Id.ToString())) // чекбокс выделен
+                {
+                    if (!movieOptionsHS.Contains(option.Id)) // но не отображено в таблице многие-ко-многим
+                    {
+                        if (movieToUpdate.Id != null)
+                            movieToUpdate.MoviesArtists.Add(new MoviesArtist
+                            {
+                                MovieId = (int) movieToUpdate.Id,
+                                ArtistId = option.Id
+                            });
+                    }
+                }
+                else
+                {
+                    // чекбокс не выделен
+                    if (movieOptionsHS.Contains(option.Id)) // но в таблице многие-ко-многим такое отношение было
+                    {
+                        MoviesArtist movieToRemove = movieToUpdate.MoviesArtists
+                            .SingleOrDefault(m => m.ArtistId == option.Id);
+                        _context.MoviesArtists.Remove(movieToRemove ?? throw new InvalidOperationException());
+                    }
+                }
+            }
         }
     }
 }

@@ -28,5 +28,7 @@ namespace MoviesApp.Services.Dto
         public decimal Price { get; set; }
         
         public virtual ICollection<MoviesArtist> MoviesArtists { get; set; }
+        
+        public ICollection<string> SelectOptions { get; set; }
     }
 }
