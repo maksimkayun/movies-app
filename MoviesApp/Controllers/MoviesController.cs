@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
 using MoviesApp.Models;
+using MoviesApp.Services;
+using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
@@ -16,20 +18,22 @@ namespace MoviesApp.Controllers
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
         private readonly IMapper _mapper;
+        private readonly IMovieService _service;
 
 
-        public MoviesController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper)
+        public MoviesController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper, IMovieService service)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _service = service;
         }
 
         // GET: Movies
         [HttpGet]
         public IActionResult Index()
         {
-            var movies = _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieViewModel>>(_context.Movies);
+            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies().ToList());
 
             #region without mapper
 
@@ -55,12 +59,14 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            MovieViewModel viewModel = _mapper.Map<Movie, MovieViewModel>(
+            /*MovieViewModel viewModel = _mapper.Map<Movie, MovieViewModel>(
                 _context.Movies
                     .Include(ng => ng.MoviesArtists)
                     .ThenInclude(ng => ng.Artist)
                     .FirstOrDefault(m => m.Id == id)
-            );
+            );*/
+
+            var viewModel = _mapper.Map<MovieViewModel>(_service.GetMovie((int) id));
 
             #region without mapper
 
