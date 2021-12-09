@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Scaffolding;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
@@ -33,7 +34,7 @@ namespace MoviesApp.Services
         public IEnumerable<ArtistDto> GetAllArtists()
         {
             return _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDto>>(
-                _context.Artists.Include(e=>e.MoviesArtists).ToList()
+                _context.Artists.Include(e => e.MoviesArtists).ToList()
             );
         }
 
@@ -84,7 +85,7 @@ namespace MoviesApp.Services
         {
             var artist = _context.Artists.Add(_mapper.Map<Artist>(artistDto)).Entity;
             _context.SaveChanges();
-            if (artistDto.SelectOptions != null) 
+            if (artistDto.SelectOptions != null)
             {
                 foreach (var movie in artistDto.SelectOptions)
                 {
@@ -107,29 +108,118 @@ namespace MoviesApp.Services
 
         public ArtistDto DeleteArtist(int id)
         {
-            throw new System.NotImplementedException();
+            var artist = _context.Artists.Find(id);
+            if (artist == null)
+            {
+                return null;
+            }
+
+            var coommunications = _context.MoviesArtists.Where(ma => ma.ArtistId == id)
+                .Select(ma => ma).ToList();
+            foreach (var elem in coommunications)
+            {
+                _context.MoviesArtists.Remove(elem);
+            }
+
+            _context.Artists.Remove(artist);
+            _context.SaveChanges();
+
+            return _mapper.Map<ArtistDto>(artist);
         }
+
+        private bool ArtistExists(int id)
+        {
+            return _context.Artists.Any(e => e.Id == id);
+        }
+
+        #region API
 
         public IEnumerable<ArtistDtoApi> GetAllArtistApi()
         {
-            throw new System.NotImplementedException();
+            return _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDtoApi>>(
+                _context.Artists.Include(e => e.MoviesArtists).ToList()
+            );
         }
 
         public ArtistDtoApi GetArtistApi(int id)
         {
-            throw new System.NotImplementedException();
+            return _mapper.Map<ArtistDtoApi>(
+                _context.Artists
+                    .Include(e => e.MoviesArtists)
+                    .FirstOrDefault(a => a.Id == id)
+            );
         }
 
         public ArtistDtoApi AddArtistApi(ArtistDtoApi inputDtoApi)
         {
-            throw new System.NotImplementedException();
+            var artist = _context.Artists.Add(_mapper.Map<Artist>(inputDtoApi)).Entity;
+            _context.SaveChanges();
+            if (inputDtoApi.MoviesArtistsIds != null)
+            {
+                foreach (var movie in inputDtoApi.MoviesArtistsIds)
+                {
+                    var id = _mapper.Map<ArtistDto>(artist).Id;
+                    if (id != null)
+                    {
+                        var movieToAdd = new MoviesArtist
+                        {
+                            ArtistId = (int) id,
+                            MovieId = movie
+                        };
+                        _context.MoviesArtists.Add(movieToAdd);
+                    }
+                }
+            }
+
+            _context.SaveChanges();
+            return _mapper.Map<ArtistDtoApi>(artist);
         }
 
         public ArtistDtoApi UpdateArtistApi(ArtistDtoApi artistDto)
         {
-            throw new System.NotImplementedException();
+            if (artistDto.Id == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var artistToUpdate = _context.Artists
+                    .Include(e => e.MoviesArtists)
+                    .ThenInclude(e => e.Movie)
+                    .FirstOrDefault(e => e.Id == artistDto.Id);
+                UpdateMoviesArtists(artistDto.MoviesArtistsIds.Select(e=>e.ToString()).ToArray(), artistToUpdate);
+                if (artistToUpdate != null)
+                {
+                    artistToUpdate.FirstName = artistDto.FirstName;
+                    artistToUpdate.LastName = artistDto.LastName;
+                    artistToUpdate.Birthday = artistDto.Birthday;
+                    _context.Artists.Update(artistToUpdate);
+                    _context.SaveChanges();
+                }
+
+                return _mapper.Map<ArtistDtoApi>(artistToUpdate);
+            }
+            catch (DbUpdateException)
+            {
+                if (!ArtistExists((int) artistDto.Id))
+                {
+                    //упрощение для примера
+                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
+                    return null;
+                }
+                else
+                {
+                    //упрощение для примера
+                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
+                    return null;
+                }
+            }
         }
-        
+
+        #endregion
+
+
         private void UpdateMoviesArtists(string[] selectedOptions, Artist artistToUpdate)
         {
             if (selectedOptions == null)
@@ -165,10 +255,6 @@ namespace MoviesApp.Services
                     }
                 }
             }
-        }
-        private bool ArtistExists(int id)
-        {
-            return _context.Artists.Any(e => e.Id == id);
         }
     }
 }

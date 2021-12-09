@@ -38,6 +38,7 @@ namespace MoviesApp
             
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IArtistService, ArtistService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
