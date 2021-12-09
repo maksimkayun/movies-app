@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using MoviesApp.Models;
+using MoviesApp.Services.Dto;
 
 namespace MoviesApp.ViewModels.AutoMapperProfiles
 {
@@ -9,10 +10,10 @@ namespace MoviesApp.ViewModels.AutoMapperProfiles
     {
         public ArtistProfile()
         {
-            CreateMap<Artist, InputArtistViewModel>().ReverseMap();
-            CreateMap<Artist, DeleteArtistViewModel>();
-            CreateMap<Artist, EditArtistViewModel>().ReverseMap();
-            CreateMap<Artist, ArtistViewModel>();
+            CreateMap<ArtistDto, InputArtistViewModel>().ReverseMap();
+            CreateMap<ArtistDto, DeleteArtistViewModel>();
+            CreateMap<ArtistDto, EditArtistViewModel>().ReverseMap();
+            CreateMap<ArtistDto, ArtistViewModel>().ReverseMap();
         }
     }
 }

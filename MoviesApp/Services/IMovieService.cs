@@ -12,7 +12,7 @@ namespace MoviesApp.Services
         MovieDto AddMovie(MovieDto movieDto);
         MovieDto DeleteMovie(int id);
 
-        #region APIs
+        #region API
 
         IEnumerable<MovieDtoApi> GetAllMoviesApi();
 

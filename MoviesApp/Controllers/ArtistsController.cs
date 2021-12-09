@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
 using MoviesApp.Models;
+using MoviesApp.Services;
 using MoviesApp.Validation;
 using MoviesApp.ViewModels;
 
@@ -17,12 +18,14 @@ namespace MoviesApp.Controllers
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
         private readonly IMapper _mapper;
+        private readonly IArtistService _service;
 
-        public ArtistsController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper)
+        public ArtistsController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper, IArtistService service)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _service = service;
         }
 
         [HttpGet]

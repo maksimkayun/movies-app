@@ -11,7 +11,6 @@ namespace MoviesApp.ViewModels.AutoMapperProfiles
             CreateMap<MovieDto, InputMovieViewModel>().ReverseMap();
             CreateMap<MovieDto, DeleteMovieViewModel>();
             CreateMap<MovieDto, EditMovieViewModel>().ReverseMap();
-            CreateMap<MovieDto, MovieViewModel>();
             CreateMap<MovieDto, MovieViewModel>().ReverseMap();
         }
     }
