@@ -254,7 +254,6 @@ namespace MoviesApp.Controllers
 
             #endregion
 
-
             if (deleteModel == null)
             {
                 return NotFound();
@@ -268,7 +267,7 @@ namespace MoviesApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            _logger.LogError($"Movie with id {id} has been deleted!");
+            _logger.LogInformation($"Movie with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }
 

@@ -21,7 +21,9 @@ namespace MoviesApp.Services
             _context = context;
             _mapper = mapper;
         }
-        
+
+        #region Controllers visual
+
         public MovieDto GetMovie(int id)
         {
             return _mapper.Map<MovieDto>(
@@ -173,5 +175,96 @@ namespace MoviesApp.Services
                 }
             }
         }
+
+        #endregion
+
+        #region APIs
+        
+        public IEnumerable<MovieDtoApi> GetAllMoviesApi()
+        {
+            return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDtoApi>>(
+                _context.Movies.Include(e=>e.MoviesArtists).ToList()
+            );
+        }
+
+        public MovieDtoApi GetMovieApi(int id)
+        {
+            return _mapper.Map<MovieDtoApi>(
+                _context.Movies
+                    .Include(e=>e.MoviesArtists)
+                    .FirstOrDefault(m => m.Id == id)
+            );
+        }
+
+        public MovieDtoApi AddMovieApi(MovieDtoApi inputDtoApi)
+        {
+            var movie = _context.Add((object) _mapper.Map<Movie>(inputDtoApi)).Entity;
+            _context.SaveChanges();
+            if (inputDtoApi.MoviesArtistsIds != null)
+            {
+                foreach (var artist in inputDtoApi.MoviesArtistsIds)
+                {
+                    var id = _mapper.Map<MovieDto>(movie).Id;
+                    if (id != null)
+                    {
+                        var artistToAdd = new MoviesArtist
+                        {
+                            ArtistId = artist,
+                            MovieId = (int) id
+                        };
+                        _context.MoviesArtists.Add(artistToAdd);
+                    }
+                }
+            }
+            _context.SaveChanges();
+            return _mapper.Map<MovieDtoApi>(movie);
+        }
+
+        public MovieDtoApi UpdateMovieApi(MovieDtoApi movieDto)
+        {
+            if (movieDto.Id == null)
+            {
+                //упрощение для примера
+                //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
+                return null;
+            }
+            
+            try
+            {
+                var movieToUpdate = _context.Movies
+                    .Include(m => m.MoviesArtists)
+                    .ThenInclude(a=>a.Artist)
+                    .FirstOrDefault(m => m.Id == movieDto.Id);
+                UpdateMoviesArtists(movieDto.MoviesArtistsIds.Select(e=>e.ToString()).ToArray(), movieToUpdate);
+                if (movieToUpdate != null)
+                {
+                    movieToUpdate.Title = movieDto.Title;
+                    movieToUpdate.Genre = movieDto.Genre;
+                    movieToUpdate.ReleaseDate = movieDto.ReleaseDate;
+                    movieToUpdate.Price = movieDto.Price;
+                    _context.Update(movieToUpdate);
+                    _context.SaveChanges();
+                }
+
+                return _mapper.Map<MovieDtoApi>(movieToUpdate);
+            }
+            catch (DbUpdateException)
+            {
+                if (!MovieExists((int) movieDto.Id))
+                {
+                    //упрощение для примера
+                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
+                    return null;
+                }
+                else
+                {
+                    //упрощение для примера
+                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
+                    return null;
+                }
+            }
+        }
+
+        #endregion
     }
 }

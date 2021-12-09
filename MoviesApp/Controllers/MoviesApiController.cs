@@ -17,10 +17,12 @@ namespace MoviesApp.Controllers
     public class MoviesApiController : ControllerBase
     {
         private readonly IMovieService _service;
+        private readonly IMapper _mapper;
         
-        public MoviesApiController(IMovieService service)
+        public MoviesApiController(IMovieService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         [HttpGet] // GET: /api/movies
@@ -28,7 +30,7 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public ActionResult<IEnumerable<MovieDto>> GetMovies()
         {
-            return Ok(_service.GetAllMovies());
+            return Ok(_service.GetAllMoviesApi());
         }
         
         [HttpGet("{id}")] // GET: /api/movies/5
@@ -36,22 +38,22 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetById(int id)
         {
-            var movie = _service.GetMovie(id);
+            var movie = _service.GetMovieApi(id);
             if (movie == null) return NotFound();  
             return Ok(movie);
         }
         
         [HttpPost] // POST: api/movies
-        public ActionResult<MovieDto> PostMovie(MovieDto inputDto)
+        public ActionResult<MovieDto> PostMovie(MovieDtoApi inputDtoApi)
         {
-            var movie = _service.AddMovie(inputDto);
+            var movie = _service.AddMovieApi(inputDtoApi);
             return CreatedAtAction("GetById", new { id = movie.Id }, movie);
         }
         
         [HttpPut("{id}")] // PUT: api/movies/5
-        public IActionResult UpdateMovie(int id, MovieDto editDto)
+        public IActionResult UpdateMovie(int id, MovieDtoApi editDto)
         {
-            var movie = _service.UpdateMovie(editDto);
+            var movie = _service.UpdateMovieApi(editDto);
 
             if (movie==null)
             {
@@ -64,7 +66,7 @@ namespace MoviesApp.Controllers
         [HttpDelete("{id}")] // DELETE: api/movie/5
         public ActionResult<MovieDto> DeleteMovie(int id)
         {
-            var movie = _service.DeleteMovie(id);
+            var movie = _mapper.Map<MovieDtoApi>(_service.DeleteMovie(id));
             if (movie == null) return NotFound();  
             return Ok(movie);
         }
