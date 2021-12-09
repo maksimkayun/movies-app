@@ -88,6 +88,23 @@ namespace MoviesApp.Services
         {
             var movie = _context.Add((object) _mapper.Map<Movie>(movieDto)).Entity;
             _context.SaveChanges();
+            if (movieDto.SelectOptions != null)
+            {
+                foreach (var artist in movieDto.SelectOptions)
+                {
+                    var id = _mapper.Map<MovieDto>(movie).Id;
+                    if (id != null)
+                    {
+                        var artistToAdd = new MoviesArtist
+                        {
+                            ArtistId = int.Parse(artist),
+                            MovieId = (int) id
+                        };
+                        _context.MoviesArtists.Add(artistToAdd);
+                    }
+                }
+            }
+            _context.SaveChanges();
             return _mapper.Map<MovieDto>(movie);
         }
 
@@ -100,7 +117,14 @@ namespace MoviesApp.Services
                 //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
-
+            
+            var сommunications = _context.MoviesArtists.Where(ma => ma.MovieId == id)
+                .Select(ma => ma).ToList();
+            foreach (var elem in сommunications)
+            {
+                _context.MoviesArtists.Remove(elem);
+            }
+            
             _context.Movies.Remove(movie);
             _context.SaveChanges();
             

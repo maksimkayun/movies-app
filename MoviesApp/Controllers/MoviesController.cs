@@ -110,8 +110,6 @@ namespace MoviesApp.Controllers
         public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] InputMovieViewModel inputModel,
             string[] selectedOptions)
         {
-            Movie newMovie = _mapper.Map<InputMovieViewModel, Movie>(inputModel);
-
             #region without mapper
 
             /*var newMovie = new Movie
@@ -127,22 +125,9 @@ namespace MoviesApp.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Add(newMovie);
-                _context.SaveChanges();
-                if (selectedOptions != null)
-                {
-                    foreach (var artist in selectedOptions)
-                    {
-                        var artistToAdd = new MoviesArtist
-                        {
-                            ArtistId = int.Parse(artist),
-                            MovieId = newMovie.Id
-                        };
-                        _context.MoviesArtists.Add(artistToAdd);
-                        _context.SaveChanges();
-                    }
-                }
-
+                MovieDto newMovie = _mapper.Map<MovieDto>(inputModel);
+                newMovie.SelectOptions = selectedOptions;
+                _service.AddMovie(newMovie);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -218,11 +203,6 @@ namespace MoviesApp.Controllers
             string[] selectedOptions)
         {
             var movieToUpdate = _mapper.Map<EditMovieViewModel>(editModel);
-            //var movieToUpdate = _mapper.Map<MovieDto>(_service.UpdateMovie())
-            /*var movieToUpdate = _context.Movies
-                .Include(m => m.MoviesArtists)
-                .ThenInclude(am => am.Artist)
-                .SingleOrDefault(m => m.Id == id);*/
             if (ModelState.IsValid)
             {
                 try
@@ -231,16 +211,6 @@ namespace MoviesApp.Controllers
                     movieDto.SelectOptions = selectedOptions.ToList();
                     movieDto.Id = id;
                     movieToUpdate = _mapper.Map<EditMovieViewModel>(_service.UpdateMovie(movieDto));
-                    //Movie movieToUpdateCheckboxes = _mapper.Map<Movie>(movieToUpdate);
-                    /*if (movieToUpdate != null)
-                    {
-                        movieToUpdate.Title = editModel.Title;
-                        movieToUpdate.Genre = editModel.Genre;
-                        movieToUpdate.ReleaseDate = editModel.ReleaseDate;
-                        movieToUpdate.Price = editModel.Price;
-                        _context.Update(movieToUpdate);
-                    }*/
-                    //_context.SaveChanges();
                 }
                 catch (DbUpdateException)
                 {
@@ -270,12 +240,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            DeleteMovieViewModel deleteModel = _mapper.Map<Movie, DeleteMovieViewModel>(
-                _context.Movies
-                    .Include(ng => ng.MoviesArtists)
-                    .ThenInclude(ng => ng.Artist)
-                    .FirstOrDefault(m => m.Id == id)
-            );
+            DeleteMovieViewModel deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_service.DeleteMovie((int) id));
 
             #region without mapper
 
@@ -303,17 +268,7 @@ namespace MoviesApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var movie = _context.Movies.Find(id);
-            var сommunications = _context.MoviesArtists.Where(ma => ma.MovieId == id)
-                .Select(ma => ma).ToList();
-            foreach (var elem in сommunications)
-            {
-                _context.MoviesArtists.Remove(elem);
-            }
-
-            _context.Movies.Remove(movie);
-            _context.SaveChanges();
-            _logger.LogError($"Movie with id {movie.Id} has been deleted!");
+            _logger.LogError($"Movie with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }
 
