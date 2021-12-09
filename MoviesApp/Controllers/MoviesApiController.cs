@@ -1,14 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MoviesApp.Data;
-using MoviesApp.Models;
 using MoviesApp.Services;
 using MoviesApp.Services.Dto;
-using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
@@ -26,9 +20,9 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet] // GET: /api/movies
-        [ProducesResponseType(200, Type = typeof(IEnumerable<MovieDto>))]  
+        [ProducesResponseType(200, Type = typeof(IEnumerable<MovieDtoApi>))]  
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<MovieDto>> GetMovies()
+        public ActionResult<IEnumerable<MovieDtoApi>> GetMovies()
         {
             return Ok(_service.GetAllMoviesApi());
         }
