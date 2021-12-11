@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Index()
         {
             var artists = _mapper.Map<IEnumerable<ArtistDto>, IEnumerable<ArtistViewModel>>(_service.GetAllArtists().ToList());
@@ -50,6 +52,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -68,6 +71,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             var artist = new InputArtistViewModel();
@@ -78,6 +82,7 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AgeOfTheArtist]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create([Bind("FirstName,LastName,Birthday")] InputArtistViewModel inputModel,
             string[] selectedOptions)
         {
@@ -106,6 +111,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -141,6 +147,7 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AgeOfTheArtist]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id, [Bind("FirstName,LastName,Birthday")] EditArtistViewModel editModel,
             string[] selectedOptions)
         {
@@ -192,6 +199,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int? id)
         {
             if (id == null)
@@ -200,7 +208,7 @@ namespace MoviesApp.Controllers
             }
 
             DeleteArtistViewModel deleteModel =
-                _mapper.Map<ArtistDto, DeleteArtistViewModel>(_service.DeleteArtist((int) id));
+                _mapper.Map<ArtistDto, DeleteArtistViewModel>(_service.GetArtist((int) id));
 
             #region without mapper
 
@@ -223,6 +231,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteConfirmed(int id)
         {
             _logger.LogInformation($"Artist with id {id} has been deleted!");

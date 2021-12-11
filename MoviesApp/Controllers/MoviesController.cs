@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -31,6 +32,7 @@ namespace MoviesApp.Controllers
 
         // GET: Movies
         [HttpGet]
+        [Authorize]
         public IActionResult Index()
         {
             var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies().ToList());
@@ -52,6 +54,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -98,6 +101,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             InputMovieViewModel movie = new InputMovieViewModel();
@@ -107,6 +111,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] InputMovieViewModel inputModel,
             string[] selectedOptions)
         {
@@ -154,6 +159,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")] 
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -199,6 +205,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] 
         public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] EditMovieViewModel editModel,
             string[] selectedOptions)
         {
@@ -232,6 +239,7 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")] 
         // GET: Movies/Delete/5
         public IActionResult Delete(int? id)
         {
@@ -240,7 +248,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            DeleteMovieViewModel deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_service.DeleteMovie((int) id));
+            DeleteMovieViewModel deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_service.GetMovie((int) id));
 
             #region without mapper
 
@@ -265,6 +273,7 @@ namespace MoviesApp.Controllers
         // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] 
         public IActionResult DeleteConfirmed(int id)
         {
             _logger.LogInformation($"Movie with id {id} has been deleted!");

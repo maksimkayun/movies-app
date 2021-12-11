@@ -9,36 +9,36 @@
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Movie</h4>
-    <hr />
+    <hr/>
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             <label asp-for="Title"></label>
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Model.Title
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             <label asp-for="ReleaseDate"></label>
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Model.ReleaseDate.ToString("dd.MM.yyyy")
         </dd>
-        <dt class = "col-sm-2">
-           <label asp-for="Genre"></label>
+        <dt class="col-sm-2">
+            <label asp-for="Genre"></label>
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Model.Genre
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             <label asp-for="Price"></label>
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Model.Price
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <input type="submit" value="Delete" class="btn btn-danger"/> |
         <a asp-action="Index">Back to List</a>
     </form>
 </div>
