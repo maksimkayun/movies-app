@@ -11,7 +11,8 @@ namespace MoviesApp.Data
     {
         public static void Initialize(IServiceProvider serviceProvider)
         {
-            using (var context = new MoviesContext(serviceProvider.GetRequiredService<DbContextOptions<MoviesContext>>()))
+            using (var context =
+                   new MoviesContext(serviceProvider.GetRequiredService<DbContextOptions<MoviesContext>>()))
             {
                 // Look for any movies.
                 if (!context.Movies.Any())
@@ -46,18 +47,44 @@ namespace MoviesApp.Data
                             Price = 3.99M
                         }
                     );
-                    
+
                     context.SaveChanges();
                 }
-                
+
+                if (!context.Artists.Any())
+                {
+                    context.Artists.AddRange(
+                        new Artist
+                        {
+                            FirstName = "Angelina",
+                            LastName = "Jolie",
+                            Birthday = DateTime.Parse("1975-6-4")
+                        },
+                        new Artist
+                        {
+                            FirstName = "Jason",
+                            LastName = "Statham",
+                            Birthday = DateTime.Parse("1967-7-26")
+                        },
+                        new Artist
+                        {
+                            FirstName = "Bradley",
+                            LastName = "Pitt",
+                            Birthday = DateTime.Parse("1963-12-18")
+                        }
+                    );
+
+                    context.SaveChanges();
+                }
+
                 var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
                 var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
 
                 if (!roleManager.RoleExistsAsync("Admin").Result)
                 {
-                    roleManager.CreateAsync(new IdentityRole { Name = "Admin" }).Wait();
+                    roleManager.CreateAsync(new IdentityRole {Name = "Admin"}).Wait();
                 }
-                
+
                 if (userManager.FindByEmailAsync("admin@example.com").Result == null)
                 {
                     var user = new ApplicationUser
@@ -69,7 +96,7 @@ namespace MoviesApp.Data
                     };
 
                     IdentityResult result = userManager.CreateAsync(user, "P@ssw0rd").Result;
- 
+
                     if (result.Succeeded)
                     {
                         userManager.AddToRoleAsync(user, "Admin").Wait();
