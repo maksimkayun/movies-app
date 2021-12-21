@@ -234,6 +234,7 @@ namespace MoviesApp.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult DeleteConfirmed(int id)
         {
+            var artist = _mapper.Map<ArtistDto>(_service.DeleteArtist(id));
             _logger.LogInformation($"Artist with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }

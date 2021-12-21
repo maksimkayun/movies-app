@@ -276,6 +276,7 @@ namespace MoviesApp.Controllers
         [Authorize(Roles = "Admin")] 
         public IActionResult DeleteConfirmed(int id)
         {
+            var movie = _mapper.Map<MovieDtoApi>(_service.DeleteMovie(id));
             _logger.LogInformation($"Movie with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }
