@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
+using MoviesApp.ViewModels;
 
 namespace MoviesApp.Services
 {
@@ -23,5 +24,7 @@ namespace MoviesApp.Services
         MovieDtoApi UpdateMovieApi(MovieDtoApi movieDto);
 
         #endregion
+
+        public List<OptionVModelMovie> PopulateAssignedMovieData(InputMovieViewModel movie);
     }
 }

@@ -105,7 +105,7 @@ namespace MoviesApp.Controllers
         public IActionResult Create()
         {
             InputMovieViewModel movie = new InputMovieViewModel();
-            PopulateAssignedMovieData(movie);
+            PopulateAssignedMovieDataView(movie);
             return View();
         }
 
@@ -136,26 +136,13 @@ namespace MoviesApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateAssignedMovieData(inputModel);
+            PopulateAssignedMovieDataView(inputModel);
             return View(inputModel);
         }
 
-        private void PopulateAssignedMovieData(InputMovieViewModel movie)
+        private void PopulateAssignedMovieDataView(InputMovieViewModel movie)
         {
-            var allOptions = _context.Artists;
-            var currentOptionIDs = new HashSet<int>(movie.MoviesArtists.Select(m => m.ArtistId));
-            var checkBoxes = new List<OptionVModelMovie>();
-            foreach (var option in allOptions)
-            {
-                checkBoxes.Add(new OptionVModelMovie
-                {
-                    Id = option.Id,
-                    Name = option.FirstName + " " + option.LastName,
-                    Assigned = currentOptionIDs.Contains(option.Id)
-                });
-            }
-
-            ViewData["ArtistOptions"] = checkBoxes;
+            ViewData["ArtistOptions"] = _service.PopulateAssignedMovieData(movie);
         }
 
         [HttpGet]
@@ -199,7 +186,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            PopulateAssignedMovieData(editModel);
+            PopulateAssignedMovieDataView(editModel);
             return View(editModel);
         }
 
@@ -234,7 +221,7 @@ namespace MoviesApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateAssignedMovieData(movieToUpdate);
+            PopulateAssignedMovieDataView(movieToUpdate);
             return View(movieToUpdate);
         }
 

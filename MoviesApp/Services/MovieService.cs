@@ -8,14 +8,15 @@ using MoviesApp.Controllers;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
+using MoviesApp.ViewModels;
 
 namespace MoviesApp.Services
 {
-    public class MovieService:IMovieService
+    public class MovieService : IMovieService
     {
         private readonly MoviesContext _context;
         private readonly IMapper _mapper;
-        
+
         public MovieService(MoviesContext context, IMapper mapper)
         {
             _context = context;
@@ -28,17 +29,17 @@ namespace MoviesApp.Services
         {
             return _mapper.Map<MovieDto>(
                 _context.Movies
-                    .Include(e=>e.MoviesArtists)
-                    .ThenInclude(e=>e.Artist)
+                    .Include(e => e.MoviesArtists)
+                    .ThenInclude(e => e.Artist)
                     .FirstOrDefault(m => m.Id == id)
-                );
+            );
         }
 
         public IEnumerable<MovieDto> GetAllMovies()
         {
             return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDto>>(
-                _context.Movies.Include(e=>e.MoviesArtists).ToList()
-                );
+                _context.Movies.Include(e => e.MoviesArtists).ToList()
+            );
         }
 
         public MovieDto UpdateMovie(MovieDto movieDto)
@@ -49,12 +50,12 @@ namespace MoviesApp.Services
                 //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
-            
+
             try
             {
                 var movieToUpdate = _context.Movies
                     .Include(m => m.MoviesArtists)
-                    .ThenInclude(a=>a.Artist)
+                    .ThenInclude(a => a.Artist)
                     .FirstOrDefault(m => m.Id == movieDto.Id);
                 UpdateMoviesArtists(movieDto.SelectOptions.ToArray(), movieToUpdate);
                 if (movieToUpdate != null)
@@ -106,6 +107,7 @@ namespace MoviesApp.Services
                     }
                 }
             }
+
             _context.SaveChanges();
             return _mapper.Map<MovieDto>(movie);
         }
@@ -119,25 +121,25 @@ namespace MoviesApp.Services
                 //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
-            
+
             var сommunications = _context.MoviesArtists.Where(ma => ma.MovieId == id)
                 .Select(ma => ma).ToList();
             foreach (var elem in сommunications)
             {
                 _context.MoviesArtists.Remove(elem);
             }
-            
+
             _context.Movies.Remove(movie);
             _context.SaveChanges();
-            
+
             return _mapper.Map<MovieDto>(movie);
         }
-        
+
         private bool MovieExists(int id)
         {
             return _context.Movies.Any(e => e.Id == id);
         }
-        
+
         private void UpdateMoviesArtists(string[] selectedOptions, Movie movieToUpdate)
         {
             if (selectedOptions == null)
@@ -179,11 +181,11 @@ namespace MoviesApp.Services
         #endregion
 
         #region APIs
-        
+
         public IEnumerable<MovieDtoApi> GetAllMoviesApi()
         {
             return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDtoApi>>(
-                _context.Movies.Include(e=>e.MoviesArtists).ToList()
+                _context.Movies.Include(e => e.MoviesArtists).ToList()
             );
         }
 
@@ -191,7 +193,7 @@ namespace MoviesApp.Services
         {
             return _mapper.Map<MovieDtoApi>(
                 _context.Movies
-                    .Include(e=>e.MoviesArtists)
+                    .Include(e => e.MoviesArtists)
                     .FirstOrDefault(m => m.Id == id)
             );
         }
@@ -216,6 +218,7 @@ namespace MoviesApp.Services
                     }
                 }
             }
+
             _context.SaveChanges();
             return _mapper.Map<MovieDtoApi>(movie);
         }
@@ -228,14 +231,14 @@ namespace MoviesApp.Services
                 //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
-            
+
             try
             {
                 var movieToUpdate = _context.Movies
                     .Include(m => m.MoviesArtists)
-                    .ThenInclude(a=>a.Artist)
+                    .ThenInclude(a => a.Artist)
                     .FirstOrDefault(m => m.Id == movieDto.Id);
-                UpdateMoviesArtists(movieDto.MoviesArtistsIds.Select(e=>e.ToString()).ToArray(), movieToUpdate);
+                UpdateMoviesArtists(movieDto.MoviesArtistsIds.Select(e => e.ToString()).ToArray(), movieToUpdate);
                 if (movieToUpdate != null)
                 {
                     movieToUpdate.Title = movieDto.Title;
@@ -266,5 +269,23 @@ namespace MoviesApp.Services
         }
 
         #endregion
+
+        public List<OptionVModelMovie> PopulateAssignedMovieData(InputMovieViewModel movie)
+        {
+            var allOptions = _context.Artists;
+            var currentOptionIDs = new HashSet<int>(movie.MoviesArtists.Select(m => m.ArtistId));
+            var checkBoxes = new List<OptionVModelMovie>();
+            foreach (var option in allOptions)
+            {
+                checkBoxes.Add(new OptionVModelMovie
+                {
+                    Id = option.Id,
+                    Name = option.FirstName + " " + option.LastName,
+                    Assigned = currentOptionIDs.Contains(option.Id)
+                });
+            }
+
+            return checkBoxes;
+        }
     }
 }
