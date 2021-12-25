@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +22,7 @@ namespace MoviesApp.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IMapper _mapper;
         private readonly IArtistService _service;
+        private static List<OptionVMArtist> checkBoxes;
 
         public ArtistsController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper, IArtistService service)
         {
@@ -75,7 +77,7 @@ namespace MoviesApp.Controllers
         public IActionResult Create()
         {
             var artist = new InputArtistViewModel();
-            PopulateAssignedMovieData(artist);
+            PopulateAssignedMovieDataView(artist);
             return View();
         }
 
@@ -106,7 +108,7 @@ namespace MoviesApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateAssignedMovieData(inputModel);
+            PopulateAssignedMovieDataView(inputModel);
             return View(inputModel);
         }
 
@@ -140,7 +142,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            PopulateAssignedMovieData(editModel);
+            PopulateAssignedMovieDataView(editModel);
             return View(editModel);
         }
 
@@ -176,27 +178,11 @@ namespace MoviesApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            PopulateAssignedMovieData(artistToUpdate);
+            PopulateAssignedMovieDataView(artistToUpdate);
             return View(artistToUpdate);
         }
 
-        private void PopulateAssignedMovieData(InputArtistViewModel artist)
-        {
-            var allOptions = _context.Movies;
-            var currentOptionIDs = new HashSet<int>(artist.MoviesArtists.Select(m => m.MovieId));
-            var checkBoxes = new List<OptionVMArtist>();
-            foreach (var option in allOptions)
-            {
-                checkBoxes.Add(new OptionVMArtist
-                {
-                    Id = option.Id,
-                    Name = option.Title,
-                    Assigned = currentOptionIDs.Contains(option.Id)
-                });
-            }
-
-            ViewData["MovieOptions"] = checkBoxes;
-        }
+        
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -242,6 +228,11 @@ namespace MoviesApp.Controllers
         private bool ArtistExists(int id)
         {
             return _context.Artists.Any(e => e.Id == id);
+        }
+        
+        private void PopulateAssignedMovieDataView(InputArtistViewModel artist)
+        {
+            ViewData["MovieOptions"] = _service.PopulateAssignedMovieData(artist);
         }
     }
 }

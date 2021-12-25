@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MoviesApp.Services.Dto;
+using MoviesApp.ViewModels;
 
 namespace MoviesApp.Services
 {
@@ -19,5 +20,7 @@ namespace MoviesApp.Services
         ArtistDtoApi UpdateArtistApi(ArtistDtoApi artistDto);
 
         #endregion
+
+        public List<OptionVMArtist> PopulateAssignedMovieData(InputArtistViewModel artist);
     }
 }

@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Scaffolding;
+using MoviesApp.Controllers;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
+using MoviesApp.ViewModels;
 
 namespace MoviesApp.Services
 {
@@ -255,6 +259,24 @@ namespace MoviesApp.Services
                     }
                 }
             }
+        }
+        
+        public List<OptionVMArtist> PopulateAssignedMovieData(InputArtistViewModel artist)
+        {
+            var allOptions = _context.Movies;
+            var currentOptionIDs = new HashSet<int>(artist.MoviesArtists.Select(m => m.MovieId));
+            var checkBoxes = new List<OptionVMArtist>();
+            foreach (var option in allOptions)
+            {
+                checkBoxes.Add(new OptionVMArtist
+                {
+                    Id = option.Id,
+                    Name = option.Title,
+                    Assigned = currentOptionIDs.Contains(option.Id)
+                });
+            }
+
+            return checkBoxes;
         }
     }
 }
