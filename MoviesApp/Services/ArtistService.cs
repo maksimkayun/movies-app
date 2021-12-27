@@ -25,14 +25,27 @@ namespace MoviesApp.Services
             _mapper = mapper;
         }
 
-        public ArtistDto GetArtist(int id)
+        public ArtistDto GetArtist(int id, bool apiFlag)
         {
-            return _mapper.Map<ArtistDto>(
-                _context.Artists
-                    .Include(e => e.MoviesArtists)
-                    .ThenInclude(e => e.Movie)
-                    .FirstOrDefault(a => a.Id == id)
-            );
+            if (apiFlag)
+            {
+                var artist = _mapper.Map<ArtistDto>(
+                    _context.Artists.FirstOrDefault(e=>e.Id==id)
+                );
+                artist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == id)
+                    .Select(e => e.MovieId).ToList();
+                return artist;
+            }
+            else
+            {
+                var artist = _mapper.Map<ArtistDto>(
+                    _context.Artists
+                        .Include(e => e.MoviesArtists)
+                        .ThenInclude(e => e.Movie)
+                        .FirstOrDefault(a => a.Id == id)
+                );
+                return artist;
+            }
         }
 
         public IEnumerable<ArtistDto> GetAllArtists()
@@ -42,7 +55,7 @@ namespace MoviesApp.Services
             );
         }
 
-        public ArtistDto UpdateArtist(ArtistDto artistDto)
+        public ArtistDto UpdateArtist(ArtistDto artistDto, bool apiFlag)
         {
             if (artistDto.Id == null)
             {
@@ -55,7 +68,7 @@ namespace MoviesApp.Services
                     .Include(e => e.MoviesArtists)
                     .ThenInclude(e => e.Movie)
                     .FirstOrDefault(e => e.Id == artistDto.Id);
-                UpdateMoviesArtists(artistDto.SelectOptions.ToArray(), artistToUpdate);
+                UpdateMoviesArtists(artistDto.SelectOptions.Select(e=>e.ToString()).ToArray(), artistToUpdate);
                 if (artistToUpdate != null)
                 {
                     artistToUpdate.FirstName = artistDto.FirstName;
@@ -65,6 +78,14 @@ namespace MoviesApp.Services
                     _context.SaveChanges();
                 }
 
+                if (apiFlag)
+                {
+                    var result = _mapper.Map<ArtistDto>(artistToUpdate);
+                    result.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == artistDto.Id)
+                        .Select(e => e.MovieId).ToList();
+                    result.MoviesArtists = new List<MoviesArtist>();
+                    return result;
+                }
                 return _mapper.Map<ArtistDto>(artistToUpdate);
             }
             catch (DbUpdateException)
@@ -99,7 +120,7 @@ namespace MoviesApp.Services
                         var movieToAdd = new MoviesArtist
                         {
                             ArtistId = (int) id,
-                            MovieId = int.Parse(movie)
+                            MovieId = movie
                         };
                         _context.MoviesArtists.Add(movieToAdd);
                     }

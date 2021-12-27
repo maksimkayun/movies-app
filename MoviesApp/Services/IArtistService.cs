@@ -6,9 +6,9 @@ namespace MoviesApp.Services
 {
     public interface IArtistService
     {
-        ArtistDto GetArtist(int id);
+        ArtistDto GetArtist(int id, bool apiFlag);
         IEnumerable<ArtistDto> GetAllArtists();
-        ArtistDto UpdateArtist(ArtistDto artistDto);
+        ArtistDto UpdateArtist(ArtistDto artistDto, bool apiFlag);
         ArtistDto AddArtist(ArtistDto artistDto);
         ArtistDto DeleteArtist(int id);
 

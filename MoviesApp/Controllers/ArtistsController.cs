@@ -62,7 +62,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _mapper.Map<ArtistViewModel>(_service.GetArtist((int) id));
+            var viewModel = _mapper.Map<ArtistViewModel>(_service.GetArtist((int) id, false));
 
             if (viewModel == null)
             {
@@ -103,7 +103,7 @@ namespace MoviesApp.Controllers
             if (ModelState.IsValid)
             {
                 ArtistDto newArtist = _mapper.Map<ArtistDto>(inputModel);
-                newArtist.SelectOptions = selectedOptions;
+                newArtist.SelectOptions = selectedOptions.Select(int.Parse).ToList();
                 _service.AddArtist(newArtist);
                 return RedirectToAction(nameof(Index));
             }
@@ -121,7 +121,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            EditArtistViewModel editModel = _mapper.Map<EditArtistViewModel>(_service.GetArtist((int) id));
+            EditArtistViewModel editModel = _mapper.Map<EditArtistViewModel>(_service.GetArtist((int) id, false));
             
 
             #region without mapper
@@ -159,9 +159,9 @@ namespace MoviesApp.Controllers
                 try
                 {
                     var artistDto = _mapper.Map<ArtistDto>(editModel);
-                    artistDto.SelectOptions = selectedOptions.ToList();
+                    artistDto.SelectOptions = selectedOptions.Select(int.Parse).ToList();
                     artistDto.Id = id;
-                    artistToUpdate = _mapper.Map<EditArtistViewModel>(_service.UpdateArtist(artistDto));
+                    artistToUpdate = _mapper.Map<EditArtistViewModel>(_service.UpdateArtist(artistDto, false));
                 }
                 catch (DbUpdateException)
                 {
@@ -194,7 +194,7 @@ namespace MoviesApp.Controllers
             }
 
             DeleteArtistViewModel deleteModel =
-                _mapper.Map<ArtistDto, DeleteArtistViewModel>(_service.GetArtist((int) id));
+                _mapper.Map<ArtistDto, DeleteArtistViewModel>(_service.GetArtist((int) id, false));
 
             #region without mapper
 

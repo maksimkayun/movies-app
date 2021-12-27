@@ -23,6 +23,6 @@ namespace MoviesApp.Services.Dto
 
         public virtual ICollection<MoviesArtist> MoviesArtists { get; set; }
         
-        public ICollection<string> SelectOptions { get; set; }
+        public List<int> SelectOptions { get; set; }
     }
 }

@@ -28,11 +28,11 @@ namespace MoviesApp.Controllers
         }
         
         [HttpGet("{id}")] // GET: /api/artists/5
-        [ProducesResponseType(200, Type = typeof(ArtistDtoApi))]  
+        [ProducesResponseType(200, Type = typeof(ArtistDto))]  
         [ProducesResponseType(404)]
         public IActionResult GetById(int id)
         {
-            var artist = _service.GetArtistApi(id);
+            var artist = _service.GetArtist(id, true);
             if (artist == null) return NotFound();  
             return Ok(artist);
         }
@@ -45,10 +45,10 @@ namespace MoviesApp.Controllers
         }
         
         [HttpPut("{id}")] // PUT: api/artists/5
-        public IActionResult UpdateArtist(int id, ArtistDtoApi editDto)
+        public IActionResult UpdateArtist(int id, ArtistDto editDto)
         {
             editDto.Id = id;
-            var artist = _service.UpdateArtistApi(editDto);
+            var artist = _service.UpdateArtist(editDto, true);
 
             if (artist==null)
             {

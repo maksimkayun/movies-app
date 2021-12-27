@@ -19,9 +19,9 @@ namespace MoviesApp.Services.Dto.AutoMapperProfiles
                 .ReverseMap()
                 .ForMember(e => e.MoviesArtists,
                     opt => opt.Ignore());
-            CreateMap<ArtistDto, ArtistDtoApi>().ForMember(e => e.MoviesArtistsIds,
+            /*CreateMap<ArtistDto, ArtistDtoApi>().ForMember(e => e.MoviesArtistsIds,
                 arg => arg.MapFrom(
-                    opt => opt.SelectOptions.Select(int.Parse)));
+                    opt => opt.SelectOptions.Select(int.Parse)));*/
         }
     }
 }
