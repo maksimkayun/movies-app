@@ -20,9 +20,9 @@ namespace MoviesApp.Controllers
         }
 
         [HttpGet] // GET: /api/movies
-        [ProducesResponseType(200, Type = typeof(IEnumerable<MovieDtoApi>))]  
+        [ProducesResponseType(200, Type = typeof(IEnumerable<MovieDto>))]  
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<MovieDtoApi>> GetMovies()
+        public ActionResult<IEnumerable<MovieDto>> GetMovies()
         {
             return Ok(_service.GetAllMovies(true));
         }
