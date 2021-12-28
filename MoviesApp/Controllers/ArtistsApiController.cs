@@ -61,7 +61,7 @@ namespace MoviesApp.Controllers
         [HttpDelete("{id}")] // DELETE: api/artists/5
         public ActionResult<MovieDto> DeleteArtist(int id)
         {
-            var artist = _mapper.Map<ArtistDtoApi>(_service.DeleteArtist(id));
+            var artist = _mapper.Map<ArtistDto>(_service.DeleteArtist(id, true));
             if (artist == null) return NotFound();  
             return Ok(artist);
         }

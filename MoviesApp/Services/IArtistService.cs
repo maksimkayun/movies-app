@@ -10,7 +10,7 @@ namespace MoviesApp.Services
         IEnumerable<ArtistDto> GetAllArtists(bool apiFlag);
         ArtistDto UpdateArtist(ArtistDto artistDto, bool apiFlag);
         ArtistDto AddArtist(ArtistDto artistDto, bool apiFlag);
-        ArtistDto DeleteArtist(int id);
+        ArtistDto DeleteArtist(int id, bool apiFlag);
 
         public List<OptionVMArtist> PopulateAssignedMovieData(InputArtistViewModel artist);
     }

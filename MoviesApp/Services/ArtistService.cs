@@ -154,7 +154,7 @@ namespace MoviesApp.Services
             return resultArtist;
         }
 
-        public ArtistDto DeleteArtist(int id)
+        public ArtistDto DeleteArtist(int id, bool apiFlag)
         {
             var artist = _context.Artists.Find(id);
             if (artist == null)
@@ -172,6 +172,13 @@ namespace MoviesApp.Services
             _context.Artists.Remove(artist);
             _context.SaveChanges();
 
+            if (apiFlag)
+            {
+                var returnResult = _mapper.Map<ArtistDto>(artist);
+                returnResult.MoviesArtists = new List<MoviesArtist>();
+                return returnResult;
+            }
+            
             return _mapper.Map<ArtistDto>(artist);
         }
 

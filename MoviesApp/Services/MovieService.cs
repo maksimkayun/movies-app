@@ -23,10 +23,19 @@ namespace MoviesApp.Services
             _mapper = mapper;
         }
 
-        #region Controllers visual
-
-        public MovieDto GetMovie(int id)
+        public MovieDto GetMovie(int id, bool apiFlag)
         {
+            if (apiFlag)
+            {
+                var movie = _mapper.Map<MovieDto>(
+                    _context.Movies.FirstOrDefault(e => e.Id == id)
+                );
+                movie.MoviesArtists = new List<MoviesArtist>();
+                movie.SelectOptions =
+                    _context.MoviesArtists.Where(e => e.MovieId == id).Select(e => e.ArtistId).ToList();
+                return movie;
+            }
+
             return _mapper.Map<MovieDto>(
                 _context.Movies
                     .Include(e => e.MoviesArtists)
@@ -35,14 +44,28 @@ namespace MoviesApp.Services
             );
         }
 
-        public IEnumerable<MovieDto> GetAllMovies()
+        public IEnumerable<MovieDto> GetAllMovies(bool apiFlag)
         {
+            if (apiFlag)
+            {
+                var movies = _mapper.Map<ICollection<MovieDto>>(
+                    _context.Movies.Select(e=>e)
+                );
+                movies.ToList().ForEach(e=>
+                {
+                    e.MoviesArtists = new List<MoviesArtist>();
+                    e.SelectOptions = _context.MoviesArtists.Where(m => m.MovieId == e.Id).Select(m => m.ArtistId)
+                        .ToList();
+                });
+                return movies;
+            }
+
             return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDto>>(
                 _context.Movies.Include(e => e.MoviesArtists).ToList()
             );
         }
 
-        public MovieDto UpdateMovie(MovieDto movieDto)
+        public MovieDto UpdateMovie(MovieDto movieDto, bool apiFlag)
         {
             if (movieDto.Id == null)
             {
@@ -57,7 +80,7 @@ namespace MoviesApp.Services
                     .Include(m => m.MoviesArtists)
                     .ThenInclude(a => a.Artist)
                     .FirstOrDefault(m => m.Id == movieDto.Id);
-                UpdateMoviesArtists(movieDto.SelectOptions.ToArray(), movieToUpdate);
+                UpdateMoviesArtists(movieDto.SelectOptions.Select(e => e.ToString()).ToArray(), movieToUpdate);
                 if (movieToUpdate != null)
                 {
                     movieToUpdate.Title = movieDto.Title;
@@ -67,8 +90,16 @@ namespace MoviesApp.Services
                     _context.Update(movieToUpdate);
                     _context.SaveChanges();
                 }
+                
+                var returnResult = _mapper.Map<MovieDto>(movieToUpdate);
+                if (apiFlag)
+                {
+                    returnResult.MoviesArtists = new List<MoviesArtist>();
+                    returnResult.SelectOptions = _context.MoviesArtists.Where(e => e.MovieId == returnResult.Id)
+                        .Select(e => e.ArtistId).ToList();
+                }
 
-                return _mapper.Map<MovieDto>(movieToUpdate);
+                return returnResult;
             }
             catch (DbUpdateException)
             {
@@ -87,7 +118,7 @@ namespace MoviesApp.Services
             }
         }
 
-        public MovieDto AddMovie(MovieDto movieDto)
+        public MovieDto AddMovie(MovieDto movieDto, bool apiFlag)
         {
             var movie = _context.Add((object) _mapper.Map<Movie>(movieDto)).Entity;
             _context.SaveChanges();
@@ -100,7 +131,7 @@ namespace MoviesApp.Services
                     {
                         var artistToAdd = new MoviesArtist
                         {
-                            ArtistId = int.Parse(artist),
+                            ArtistId = artist,
                             MovieId = (int) id
                         };
                         _context.MoviesArtists.Add(artistToAdd);
@@ -109,10 +140,18 @@ namespace MoviesApp.Services
             }
 
             _context.SaveChanges();
-            return _mapper.Map<MovieDto>(movie);
+            
+            var returnResult = _mapper.Map<MovieDto>(movie);
+            if (apiFlag)
+            {
+                returnResult.MoviesArtists = new List<MoviesArtist>();
+                returnResult.SelectOptions = _context.MoviesArtists.Where(e => e.MovieId == returnResult.Id)
+                    .Select(e => e.ArtistId).ToList();
+            }
+            return returnResult;
         }
 
-        public MovieDto DeleteMovie(int id)
+        public MovieDto DeleteMovie(int id, bool apiFlag)
         {
             var movie = _context.Movies.Find(id);
             if (movie == null)
@@ -131,8 +170,14 @@ namespace MoviesApp.Services
 
             _context.Movies.Remove(movie);
             _context.SaveChanges();
+            
+            var returnResult = _mapper.Map<MovieDto>(movie);
+            if (apiFlag)
+            {
+                returnResult.MoviesArtists = new List<MoviesArtist>();
+            }
 
-            return _mapper.Map<MovieDto>(movie);
+            return returnResult;
         }
 
         private bool MovieExists(int id)
@@ -177,98 +222,6 @@ namespace MoviesApp.Services
                 }
             }
         }
-
-        #endregion
-
-        #region APIs
-
-        public IEnumerable<MovieDtoApi> GetAllMoviesApi()
-        {
-            return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDtoApi>>(
-                _context.Movies.Include(e => e.MoviesArtists).ToList()
-            );
-        }
-
-        public MovieDtoApi GetMovieApi(int id)
-        {
-            return _mapper.Map<MovieDtoApi>(
-                _context.Movies
-                    .Include(e => e.MoviesArtists)
-                    .FirstOrDefault(m => m.Id == id)
-            );
-        }
-
-        public MovieDtoApi AddMovieApi(MovieDtoApi inputDtoApi)
-        {
-            var movie = _context.Add((object) _mapper.Map<Movie>(inputDtoApi)).Entity;
-            _context.SaveChanges();
-            if (inputDtoApi.MoviesArtistsIds != null)
-            {
-                foreach (var artist in inputDtoApi.MoviesArtistsIds)
-                {
-                    var id = _mapper.Map<MovieDto>(movie).Id;
-                    if (id != null)
-                    {
-                        var artistToAdd = new MoviesArtist
-                        {
-                            ArtistId = artist,
-                            MovieId = (int) id
-                        };
-                        _context.MoviesArtists.Add(artistToAdd);
-                    }
-                }
-            }
-
-            _context.SaveChanges();
-            return _mapper.Map<MovieDtoApi>(movie);
-        }
-
-        public MovieDtoApi UpdateMovieApi(MovieDtoApi movieDto)
-        {
-            if (movieDto.Id == null)
-            {
-                //упрощение для примера
-                //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
-                return null;
-            }
-
-            try
-            {
-                var movieToUpdate = _context.Movies
-                    .Include(m => m.MoviesArtists)
-                    .ThenInclude(a => a.Artist)
-                    .FirstOrDefault(m => m.Id == movieDto.Id);
-                UpdateMoviesArtists(movieDto.MoviesArtistsIds.Select(e => e.ToString()).ToArray(), movieToUpdate);
-                if (movieToUpdate != null)
-                {
-                    movieToUpdate.Title = movieDto.Title;
-                    movieToUpdate.Genre = movieDto.Genre;
-                    movieToUpdate.ReleaseDate = movieDto.ReleaseDate;
-                    movieToUpdate.Price = movieDto.Price;
-                    _context.Update(movieToUpdate);
-                    _context.SaveChanges();
-                }
-
-                return _mapper.Map<MovieDtoApi>(movieToUpdate);
-            }
-            catch (DbUpdateException)
-            {
-                if (!MovieExists((int) movieDto.Id))
-                {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
-                    return null;
-                }
-                else
-                {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
-                    return null;
-                }
-            }
-        }
-
-        #endregion
 
         public List<OptionVModelMovie> PopulateAssignedMovieData(InputMovieViewModel movie)
         {

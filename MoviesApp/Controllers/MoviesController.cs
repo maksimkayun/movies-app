@@ -35,7 +35,7 @@ namespace MoviesApp.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies().ToList());
+            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies(false).ToList());
 
             #region without mapper
 
@@ -69,7 +69,7 @@ namespace MoviesApp.Controllers
                     .FirstOrDefault(m => m.Id == id)
             );*/
 
-            var viewModel = _mapper.Map<MovieViewModel>(_service.GetMovie((int) id));
+            var viewModel = _mapper.Map<MovieViewModel>(_service.GetMovie((int) id, false));
 
             #region without mapper
 
@@ -115,24 +115,11 @@ namespace MoviesApp.Controllers
         public IActionResult Create([Bind("Title,ReleaseDate,Genre,Price")] InputMovieViewModel inputModel,
             string[] selectedOptions)
         {
-            #region without mapper
-
-            /*var newMovie = new Movie
-            {
-                Title = inputModel.Title,
-                Genre = inputModel.Genre,
-                ReleaseDate = inputModel.ReleaseDate,
-                Price = inputModel.Price,
-                MoviesArtists = inputModel.MoviesArtists
-            };*/
-
-            #endregion
-
             if (ModelState.IsValid)
             {
                 MovieDto newMovie = _mapper.Map<MovieDto>(inputModel);
-                newMovie.SelectOptions = selectedOptions;
-                _service.AddMovie(newMovie);
+                newMovie.SelectOptions = selectedOptions.Select(int.Parse).ToList();
+                _service.AddMovie(newMovie, false);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -154,7 +141,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            EditMovieViewModel editModel = _mapper.Map<EditMovieViewModel>(_service.GetMovie((int) id));
+            EditMovieViewModel editModel = _mapper.Map<EditMovieViewModel>(_service.GetMovie((int) id, false));
 
             #region without mapper
 
@@ -202,9 +189,9 @@ namespace MoviesApp.Controllers
                 try
                 {
                     var movieDto = _mapper.Map<MovieDto>(editModel);
-                    movieDto.SelectOptions = selectedOptions.ToList();
+                    movieDto.SelectOptions = selectedOptions.Select(int.Parse).ToList();
                     movieDto.Id = id;
-                    movieToUpdate = _mapper.Map<EditMovieViewModel>(_service.UpdateMovie(movieDto));
+                    movieToUpdate = _mapper.Map<EditMovieViewModel>(_service.UpdateMovie(movieDto, false));
                 }
                 catch (DbUpdateException)
                 {
@@ -235,19 +222,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            DeleteMovieViewModel deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_service.GetMovie((int) id));
-
-            #region without mapper
-
-            /*var deleteModel = _context.Movies.Where(m => m.Id == id).Select(m => new DeleteMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();*/
-
-            #endregion
+            DeleteMovieViewModel deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_service.GetMovie((int) id, false));
 
             if (deleteModel == null)
             {
@@ -263,7 +238,7 @@ namespace MoviesApp.Controllers
         [Authorize(Roles = "Admin")] 
         public IActionResult DeleteConfirmed(int id)
         {
-            var movie = _mapper.Map<MovieDtoApi>(_service.DeleteMovie(id));
+            _mapper.Map<MovieDto>(_service.DeleteMovie(id , false));
             _logger.LogInformation($"Movie with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }

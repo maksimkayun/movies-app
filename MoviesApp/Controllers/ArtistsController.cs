@@ -196,17 +196,6 @@ namespace MoviesApp.Controllers
             DeleteArtistViewModel deleteModel =
                 _mapper.Map<ArtistDto, DeleteArtistViewModel>(_service.GetArtist((int) id, false));
 
-            #region without mapper
-
-            /*var deleteModel = _context.Artists.Where(m => m.Id == id).Select(m => new DeleteArtistViewModel
-            {
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                Birthday = m.Birthday
-            }).FirstOrDefault();*/
-
-            #endregion
-
             if (deleteModel == null)
             {
                 return NotFound();
@@ -220,7 +209,7 @@ namespace MoviesApp.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult DeleteConfirmed(int id)
         {
-            var artist = _mapper.Map<ArtistDto>(_service.DeleteArtist(id));
+            _service.DeleteArtist(id, false);
             _logger.LogInformation($"Artist with id {id} has been deleted!");
             return RedirectToAction(nameof(Index));
         }
