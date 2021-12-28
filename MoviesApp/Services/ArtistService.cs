@@ -30,7 +30,7 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 var artist = _mapper.Map<ArtistDto>(
-                    _context.Artists.FirstOrDefault(e=>e.Id==id)
+                    _context.Artists.FirstOrDefault(e => e.Id == id)
                 );
                 artist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == id)
                     .Select(e => e.MovieId).ToList();
@@ -48,8 +48,23 @@ namespace MoviesApp.Services
             }
         }
 
-        public IEnumerable<ArtistDto> GetAllArtists()
+        public IEnumerable<ArtistDto> GetAllArtists(bool apiFlag)
         {
+            if (apiFlag)
+            {
+                IEnumerable<ArtistDto> artists = _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDto>>(
+                    _context.Artists.AsNoTracking().ToList()
+                ).ToList();
+                foreach (var artist in artists)
+                {
+                    artist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == artist.Id)
+                        .Select(e => e.MovieId).ToList();
+                    artist.MoviesArtists = new List<MoviesArtist>();
+                }
+
+                return artists;
+            }
+
             return _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDto>>(
                 _context.Artists.Include(e => e.MoviesArtists).ToList()
             );
@@ -68,7 +83,7 @@ namespace MoviesApp.Services
                     .Include(e => e.MoviesArtists)
                     .ThenInclude(e => e.Movie)
                     .FirstOrDefault(e => e.Id == artistDto.Id);
-                UpdateMoviesArtists(artistDto.SelectOptions.Select(e=>e.ToString()).ToArray(), artistToUpdate);
+                UpdateMoviesArtists(artistDto.SelectOptions.Select(e => e.ToString()).ToArray(), artistToUpdate);
                 if (artistToUpdate != null)
                 {
                     artistToUpdate.FirstName = artistDto.FirstName;
@@ -86,6 +101,7 @@ namespace MoviesApp.Services
                     result.MoviesArtists = new List<MoviesArtist>();
                     return result;
                 }
+
                 return _mapper.Map<ArtistDto>(artistToUpdate);
             }
             catch (DbUpdateException)
@@ -106,7 +122,7 @@ namespace MoviesApp.Services
             }
         }
 
-        public ArtistDto AddArtist(ArtistDto artistDto)
+        public ArtistDto AddArtist(ArtistDto artistDto, bool apiFlag)
         {
             var artist = _context.Artists.Add(_mapper.Map<Artist>(artistDto)).Entity;
             _context.SaveChanges();
@@ -128,7 +144,14 @@ namespace MoviesApp.Services
             }
 
             _context.SaveChanges();
-            return _mapper.Map<ArtistDto>(artist);
+            var resultArtist = _mapper.Map<ArtistDto>(artist);
+            if (apiFlag)
+            {
+                resultArtist.MoviesArtists = new List<MoviesArtist>();
+                resultArtist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == resultArtist.Id)
+                    .Select(e => e.MovieId).ToList();
+            }
+            return resultArtist;
         }
 
         public ArtistDto DeleteArtist(int id)
@@ -156,95 +179,7 @@ namespace MoviesApp.Services
         {
             return _context.Artists.Any(e => e.Id == id);
         }
-
-        #region API
-
-        public IEnumerable<ArtistDtoApi> GetAllArtistApi()
-        {
-            return _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDtoApi>>(
-                _context.Artists.Include(e => e.MoviesArtists).ToList()
-            );
-        }
-
-        public ArtistDtoApi GetArtistApi(int id)
-        {
-            return _mapper.Map<ArtistDtoApi>(
-                _context.Artists
-                    .Include(e => e.MoviesArtists)
-                    .FirstOrDefault(a => a.Id == id)
-            );
-        }
-
-        public ArtistDtoApi AddArtistApi(ArtistDtoApi inputDtoApi)
-        {
-            var artist = _context.Artists.Add(_mapper.Map<Artist>(inputDtoApi)).Entity;
-            _context.SaveChanges();
-            if (inputDtoApi.MoviesArtistsIds != null)
-            {
-                foreach (var movie in inputDtoApi.MoviesArtistsIds)
-                {
-                    var id = _mapper.Map<ArtistDto>(artist).Id;
-                    if (id != null)
-                    {
-                        var movieToAdd = new MoviesArtist
-                        {
-                            ArtistId = (int) id,
-                            MovieId = movie
-                        };
-                        _context.MoviesArtists.Add(movieToAdd);
-                    }
-                }
-            }
-
-            _context.SaveChanges();
-            return _mapper.Map<ArtistDtoApi>(artist);
-        }
-
-        public ArtistDtoApi UpdateArtistApi(ArtistDtoApi artistDto)
-        {
-            if (artistDto.Id == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                var artistToUpdate = _context.Artists
-                    .Include(e => e.MoviesArtists)
-                    .ThenInclude(e => e.Movie)
-                    .FirstOrDefault(e => e.Id == artistDto.Id);
-                UpdateMoviesArtists(artistDto.MoviesArtistsIds.Select(e=>e.ToString()).ToArray(), artistToUpdate);
-                if (artistToUpdate != null)
-                {
-                    artistToUpdate.FirstName = artistDto.FirstName;
-                    artistToUpdate.LastName = artistDto.LastName;
-                    artistToUpdate.Birthday = artistDto.Birthday;
-                    _context.Artists.Update(artistToUpdate);
-                    _context.SaveChanges();
-                }
-
-                return _mapper.Map<ArtistDtoApi>(artistToUpdate);
-            }
-            catch (DbUpdateException)
-            {
-                if (!ArtistExists((int) artistDto.Id))
-                {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
-                    return null;
-                }
-                else
-                {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
-                    return null;
-                }
-            }
-        }
-
-        #endregion
-
-
+        
         private void UpdateMoviesArtists(string[] selectedOptions, Artist artistToUpdate)
         {
             if (selectedOptions == null)
@@ -281,7 +216,7 @@ namespace MoviesApp.Services
                 }
             }
         }
-        
+
         public List<OptionVMArtist> PopulateAssignedMovieData(InputArtistViewModel artist)
         {
             var allOptions = _context.Movies;

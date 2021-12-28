@@ -36,7 +36,7 @@ namespace MoviesApp.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            var artists = _mapper.Map<IEnumerable<ArtistDto>, IEnumerable<ArtistViewModel>>(_service.GetAllArtists().ToList());
+            var artists = _mapper.Map<IEnumerable<ArtistDto>, IEnumerable<ArtistViewModel>>(_service.GetAllArtists(false).ToList());
 
             #region without mapper
 
@@ -104,7 +104,7 @@ namespace MoviesApp.Controllers
             {
                 ArtistDto newArtist = _mapper.Map<ArtistDto>(inputModel);
                 newArtist.SelectOptions = selectedOptions.Select(int.Parse).ToList();
-                _service.AddArtist(newArtist);
+                _service.AddArtist(newArtist, false);
                 return RedirectToAction(nameof(Index));
             }
 

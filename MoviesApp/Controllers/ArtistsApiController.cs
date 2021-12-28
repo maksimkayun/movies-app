@@ -20,11 +20,11 @@ namespace MoviesApp.Controllers
         }
         
         [HttpGet] // GET: /api/artists
-        [ProducesResponseType(200, Type = typeof(IEnumerable<ArtistDtoApi>))]  
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ArtistDto>))]  
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<ArtistDtoApi>> GetArtists()
+        public ActionResult<IEnumerable<ArtistDto>> GetArtists()
         {
-            return Ok(_service.GetAllArtistApi());
+            return Ok(_service.GetAllArtists(true));
         }
         
         [HttpGet("{id}")] // GET: /api/artists/5
@@ -38,9 +38,9 @@ namespace MoviesApp.Controllers
         }
         
         [HttpPost] // POST: api/artists
-        public ActionResult<ArtistDtoApi> PostArtist(ArtistDtoApi inputDtoApi)
+        public ActionResult<ArtistDto> PostArtist(ArtistDto inputDto)
         {
-            var artist = _service.AddArtistApi(inputDtoApi);
+            var artist = _service.AddArtist(inputDto, true);
             return CreatedAtAction("GetById", new { id = artist.Id }, artist);
         }
         
