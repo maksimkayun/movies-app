@@ -30,10 +30,9 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 var artist = _mapper.Map<ArtistDto>(
-                    _context.Artists.FirstOrDefault(e => e.Id == id)
+                    _context.Artists.Include(e=>e.MoviesArtists).FirstOrDefault(e => e.Id == id)
                 );
-                artist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == id)
-                    .Select(e => e.MovieId).ToList();
+                artist.MoviesArtists = new List<MoviesArtist>();
                 return artist;
             }
             else
@@ -53,14 +52,12 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 IEnumerable<ArtistDto> artists = _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDto>>(
-                    _context.Artists.AsNoTracking().ToList()
+                    _context.Artists.Include(e=>e.MoviesArtists).AsNoTracking().ToList()
                 ).ToList();
-                foreach (var artist in artists)
+                artists.ToList().ForEach(e =>
                 {
-                    artist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == artist.Id)
-                        .Select(e => e.MovieId).ToList();
-                    artist.MoviesArtists = new List<MoviesArtist>();
-                }
+                    e.MoviesArtists = new List<MoviesArtist>();
+                });
 
                 return artists;
             }
@@ -96,8 +93,6 @@ namespace MoviesApp.Services
                 if (apiFlag)
                 {
                     var result = _mapper.Map<ArtistDto>(artistToUpdate);
-                    result.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == artistDto.Id)
-                        .Select(e => e.MovieId).ToList();
                     result.MoviesArtists = new List<MoviesArtist>();
                     return result;
                 }
@@ -148,8 +143,6 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 resultArtist.MoviesArtists = new List<MoviesArtist>();
-                resultArtist.SelectOptions = _context.MoviesArtists.Where(e => e.ArtistId == resultArtist.Id)
-                    .Select(e => e.MovieId).ToList();
             }
             return resultArtist;
         }
