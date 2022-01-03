@@ -28,11 +28,10 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 var movie = _mapper.Map<MovieDto>(
-                    _context.Movies.FirstOrDefault(e => e.Id == id)
+                    _context.Movies
+                        .Include(e=>e.MoviesArtists).FirstOrDefault(e => e.Id == id)
                 );
                 movie.MoviesArtists = new List<MoviesArtist>();
-                movie.SelectOptions =
-                    _context.MoviesArtists.Where(e => e.MovieId == id).Select(e => e.ArtistId).ToList();
                 return movie;
             }
 
@@ -49,13 +48,12 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 var movies = _mapper.Map<ICollection<MovieDto>>(
-                    _context.Movies.Select(e=>e)
+                    _context.Movies.AsNoTracking().Select(e=>e)
+                        .Include(e=>e.MoviesArtists)
                 );
                 movies.ToList().ForEach(e=>
                 {
                     e.MoviesArtists = new List<MoviesArtist>();
-                    e.SelectOptions = _context.MoviesArtists.Where(m => m.MovieId == e.Id).Select(m => m.ArtistId)
-                        .ToList();
                 });
                 return movies;
             }
@@ -95,8 +93,6 @@ namespace MoviesApp.Services
                 if (apiFlag)
                 {
                     returnResult.MoviesArtists = new List<MoviesArtist>();
-                    returnResult.SelectOptions = _context.MoviesArtists.Where(e => e.MovieId == returnResult.Id)
-                        .Select(e => e.ArtistId).ToList();
                 }
 
                 return returnResult;
@@ -145,8 +141,6 @@ namespace MoviesApp.Services
             if (apiFlag)
             {
                 returnResult.MoviesArtists = new List<MoviesArtist>();
-                returnResult.SelectOptions = _context.MoviesArtists.Where(e => e.MovieId == returnResult.Id)
-                    .Select(e => e.ArtistId).ToList();
             }
             return returnResult;
         }

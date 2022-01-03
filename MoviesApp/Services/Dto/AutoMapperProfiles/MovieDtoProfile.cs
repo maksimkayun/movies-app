@@ -11,6 +11,9 @@ namespace MoviesApp.Services.Dto.AutoMapperProfiles
         {
             CreateMap<Movie, MovieDto>().ForMember(e => e.MoviesArtists,
                     opt => opt.MapFrom(m => m.MoviesArtists))
+                .ForMember(e=>e.SelectOptions, 
+                    opt=>opt.MapFrom(art=>
+                        art.MoviesArtists.Select(a => a.ArtistId).ToList()))
                 .ReverseMap()
                 .ForMember(e => e.MoviesArtists,
                     opt => opt.MapFrom(m => m.MoviesArtists));
