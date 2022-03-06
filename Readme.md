@@ -5,7 +5,7 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
-Этот проект сдела для демонстрации работы ASP.NET Core, а так же для демонстрации применения MVC при проектировании веб-приложений.
+Этот проект сделан для демонстрации работы ASP.NET Core, а так же для демонстрации применения MVC при проектировании веб-приложений.
 
 ## Настройка
 
