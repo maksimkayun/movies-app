@@ -14,6 +14,7 @@
 - Откройте терминал в среде разработки
 - Используйте команды: 
 ```sh
+cd MoviesApp # это нужно если вы не в директории проекта
 dotnet tool install --global dotnet-ef
 dotnet-ef migrations add init --context MoviesApp.Data.MoviesContext --output-dir Data/Migrations
 dotnet-ef database update
